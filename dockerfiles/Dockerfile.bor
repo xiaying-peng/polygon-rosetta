@@ -1,0 +1,24 @@
+FROM golang:1.16 as builder
+
+RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang-3.9 tzdata
+
+ARG BOR_VERSION="0.3.0"
+ARG BOR_COMMIT_HASH="f020b881575ee6c2265d0560365b2a1169a3cb8b"
+
+# Build Bor
+RUN git clone https://github.com/maticnetwork/bor.git /root/bor && \
+  cd /root/bor && \
+  git checkout ${BOR_COMMIT_HASH}
+
+WORKDIR /root/bor
+
+RUN make bor-all
+
+FROM ubuntu:18.04
+COPY --from=builder /root/bor/build/* /usr/bin/
+
+COPY assets /app/assets
+
+RUN chmod +x /app/assets/bor-entrypoint.sh
+
+CMD ["/app/assets/bor-entrypoint.sh"]

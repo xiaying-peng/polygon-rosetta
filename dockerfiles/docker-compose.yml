@@ -1,0 +1,70 @@
+# Copyright 2021 Coinbase, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: "3"
+
+services:
+  rosetta_offline:
+    build:
+      dockerfile: dockerfiles/Dockerfile.rosetta
+      context: ..
+    ports:
+      - 3001:3001
+    environment:
+      - NETWORK=${NETWORK:-TESTNET}
+      - LOG_LEVEL=0
+      - MODE=OFFLINE
+      - PORT=3001
+      - BOR={$BOR:-http://bor:8545}
+    restart: always
+
+  ### Blockchain containers
+  heimdall:
+    build:
+      dockerfile: Dockerfile.heimdall
+      context: .
+    environment:
+      - NETWORK=${NETWORK:-TESTNET}
+    restart: always
+    volumes:
+      - "../polygon-data/heimdall:/root/.heimdalld"
+  bor:
+    build:
+      dockerfile: Dockerfile.bor
+      context: .
+    init: true
+    ports:
+      - 8545:8545
+    environment:
+      - HEIMDALL_URL=http://heimdall:1317
+      - NETWORK=${NETWORK:-TESTNET}
+    restart: always
+    depends_on:
+    - heimdall
+    volumes:
+      - "../polygon-data/bor:/root/.bor"
+  rosetta:
+    build:
+      dockerfile: dockerfiles/Dockerfile.rosetta
+      context: ..
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      - NETWORK=${NETWORK:-TESTNET}
+      - LOG_LEVEL=0
+      - MODE=ONLINE
+      - PORT=3000
+      # Override default if you need to point to a node running remotely
+      - BOR=${BOR:-http://bor:8545}

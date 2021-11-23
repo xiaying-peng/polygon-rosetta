@@ -1,0 +1,10 @@
+{
+  "errors": [
+    {
+      "message": "hex string has length 8, want 40 for Address"
+    }
+  ],
+  "data": {
+    "block": {}
+  }
+}

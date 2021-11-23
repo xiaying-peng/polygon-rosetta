@@ -1,0 +1,44 @@
+{
+  "network": {
+    "blockchain": "polygon",
+    "network": "testnet"
+  },
+  "online_url": "http://localhost:3000",
+  "data_directory": "cli-data",
+  "http_timeout": 300,
+  "max_retries": 100,
+  "max_online_connections": 100,
+  "max_sync_concurrency": 12,
+  "tip_delay": 120,
+  "compression_disabled": true,
+  "memory_limit_disabled": true,
+  "construction": {
+    "offline_url": "http://localhost:3001",
+    "stale_depth": 30,
+    "broadcast_limit": 5,
+    "constructor_dsl_file": "polygon.ros",
+    "end_conditions": {
+      "create_account": 10,
+      "transfer": 10
+    },
+    "results_output_file": "/result.json"
+  },
+  "data": {
+    "active_reconciliation_concurrency": 34,
+    "exempt_accounts": "exempt.json",
+    "end_conditions": {
+      "reconciliation_coverage": {
+        "coverage": 0.95,
+        "from_tip": true,
+        "tip": true
+      }
+    },
+    "historical_balance_enabled": true,
+    "inactive_reconciliation_concurrency": 64,
+    "inactive_reconciliation_frequency": 250,
+    "log_blocks": true,
+    "pruning_frequency": 3600,
+    "results_output_file": "/result.json",
+    "status_port": 9090
+  }
+}

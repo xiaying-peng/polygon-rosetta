@@ -1,0 +1,10 @@
+{
+  "errors": [
+    {
+      "message": "hex string without 0x prefix"
+    }
+  ],
+  "data": {
+    "block": {}
+  }
+}

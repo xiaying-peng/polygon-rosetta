@@ -1,0 +1,13 @@
+{
+  "data": {
+    "block": {
+      "hash": "0x10ac7a3e929ef050360228b4812755d7aab9448a5dd2f7898c4593048929a2bb",
+      "number": 18678892,
+      "account": {
+        "balance": "0x2324c0d180077fe7000",
+        "transactionCount": "0x0",
+        "code": "0x"
+      }
+    }
+  }
+}

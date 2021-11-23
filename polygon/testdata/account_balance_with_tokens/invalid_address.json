@@ -1,0 +1,10 @@
+{
+    "errors": [
+        {
+            "message": "invalid hex string"
+        }
+    ],
+    "data": {
+        "block": {}
+    }
+}

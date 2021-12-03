@@ -13,15 +13,15 @@
 # limitations under the License.
 
 # Compile golang 
-FROM ubuntu:18.04 as golang-builder
+FROM ubuntu:20.04 as golang-builder
 
 RUN mkdir -p /app \
   && chown -R nobody:nogroup /app
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang-3.9
-ENV GOLANG_VERSION 1.16.8
-ENV GOLANG_DOWNLOAD_SHA256 f32501aeb8b7b723bc7215f6c373abb6981bbc7e1c7b44e9f07317e1a300dce2
+ENV GOLANG_VERSION 1.17.4
+ENV GOLANG_DOWNLOAD_SHA256 adab2483f644e2f8a10ae93122f0018cef525ca48d0b8764dae87cb5f4fd4206
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
@@ -48,7 +48,7 @@ RUN mv src/rosetta-polygon /app/rosetta-polygon \
   && rm -rf src 
 
 ## Build Final Image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 

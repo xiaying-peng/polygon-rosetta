@@ -1,4 +1,4 @@
-FROM golang:1.16 as builder
+FROM golang:1.17 as builder
 
 RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang-3.9 tzdata
 
@@ -14,7 +14,7 @@ WORKDIR /root/bor
 
 RUN make bor-all
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 COPY --from=builder /root/bor/build/* /usr/bin/
 
 COPY assets /app/assets

@@ -26,7 +26,7 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "rosetta-polygon",
+		Use:   "polygon-rosetta",
 		Short: "Polygon implementation of the Rosetta API",
 	}
 
@@ -36,7 +36,7 @@ var (
 )
 
 // Execute handles all invocations of the
-// rosetta-polygon cmd.
+// polygon-rosetta cmd.
 func Execute() error {
 	return rootCmd.Execute()
 }

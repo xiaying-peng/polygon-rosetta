@@ -19,7 +19,10 @@ RUN mkdir -p /app \
   && chown -R nobody:nogroup /app
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang-3.9
+# Set timezone:
+RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
+
+RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang
 ENV GOLANG_VERSION 1.17.4
 ENV GOLANG_DOWNLOAD_SHA256 adab2483f644e2f8a10ae93122f0018cef525ca48d0b8764dae87cb5f4fd4206
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
@@ -33,7 +36,7 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-# Compile rosetta-polygon
+# Compile polygon-rosetta
 FROM golang-builder as rosetta-builder
 
 # Use native remote build context to build in any directory
@@ -41,7 +44,7 @@ COPY . src
 RUN cd src \
   && go build
 
-RUN mv src/rosetta-polygon /app/rosetta-polygon \
+RUN mv src/polygon-rosetta /app/polygon-rosetta \
   && mkdir /app/polygon \
   && mv src/polygon/call_tracer.js /app/polygon/call_tracer.js \
   && mv src/polygon/geth.toml /app/polygon/geth.toml \
@@ -61,9 +64,9 @@ WORKDIR /app
 
 # Copy binary from rosetta-builder
 COPY --from=rosetta-builder /app/polygon /app/polygon
-COPY --from=rosetta-builder /app/rosetta-polygon /app/rosetta-polygon
+COPY --from=rosetta-builder /app/polygon-rosetta /app/polygon-rosetta
 
 # Set permissions for everything added to /app
 RUN chmod -R 755 /app/*
 
-CMD ["/app/rosetta-polygon", "run"]
+CMD ["/app/polygon-rosetta", "run"]

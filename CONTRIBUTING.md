@@ -1,4 +1,4 @@
-# Contributing to rosetta-polygon
+# Contributing to polygon-rosetta
 
 ## Code of Conduct
 

@@ -7,15 +7,14 @@
    Rosetta Polygon
 </h3>
 <p align="center">
-  <a href="https://circleci.com/gh/coinbase/rosetta-polygon/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-polygon/tree/master.svg?style=shield" /></a>
-  <a href="https://coveralls.io/github/coinbase/rosetta-polygon"><img src="https://coveralls.io/repos/github/coinbase/rosetta-polygon/badge.svg" /></a>
+  <a href="https://coveralls.io/github/maticnetwork/polygon-rosetta"><img src="https://coveralls.io/repos/github/maticnetwork/polygon-rosetta/badge.svg" /></a>
   <a href="https://goreportcard.com/report/github.com/maticnetwork/polygon-rosetta"><img src="https://goreportcard.com/badge/github.com/maticnetwork/polygon-rosetta" /></a>
-  <a href="https://github.com/maticnetwork/polygon-rosetta/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/coinbase/rosetta-polygon.svg" /></a>
+  <a href="https://github.com/maticnetwork/polygon-rosetta/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/coinbase/polygon-rosetta.svg" /></a>
   <a href="https://pkg.go.dev/github.com/maticnetwork/polygon-rosetta?tab=overview"><img src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=shield" /></a>
 </p>
 
 ## Overview
-`rosetta-polygon` provides an implementation of the Rosetta API for
+`polygon-rosetta` provides an implementation of the Rosetta API for
 Polygon in Golang. If you haven't heard of the Rosetta API, you can find more
 information [here](https://rosetta-api.org).
 
@@ -34,12 +33,12 @@ all Rosetta implementations must be deployable via Docker and support running vi
 DOCKER [HERE](https://www.docker.com/get-started).**
 
 ### Install
-Running the following commands will create a Docker image called `rosetta-polygon:latest`.
+Running the following commands will create a Docker image called `polygon-rosetta:latest`.
 
 #### From GitHub
 To download the pre-built Docker image from the latest release, run:
 ```text
-curl -sSfL https://raw.githubusercontent.com/coinbase/rosetta-polygon/master/install.sh | sh -s
+curl -sSfL https://raw.githubusercontent.com/maticnetwork/polygon-rosetta/master/install.sh | sh -s
 ```
 
 #### From Source
@@ -121,7 +120,7 @@ NETWORK=TESTNET docker-compose -p polygon -f dockerfiles/docker-compose.yml up r
 _If you cloned the repository, you can run `make run-testnet-offline`._
 
 ### Run binary
-You can also run the rosetta-polygon integration locally using a binary
+You can also run the polygon-rosetta integration locally using a binary
 
 #### Testnet:Offline
 ```text
@@ -130,16 +129,16 @@ make run-bin-testnet-offline
 
 #### Testnet:Online
 ```text
-make run-bin-testnet-online bor=<NODE_URL>
+make run-bin-testnet-online bor=<NODE_URL>:8545
 ```
 
 ## System Requirements
-`rosetta-polygon` has been tested on an [AWS c5.2xlarge instance](https://aws.amazon.com/ec2/instance-types/c5).
+`polygon-rosetta` has been tested on an [AWS c5.2xlarge instance](https://aws.amazon.com/ec2/instance-types/c5).
 This instance type has 8 vCPU and 16 GB of RAM. If you use a computer with less than 16 GB of RAM,
-it is possible that `rosetta-polygon` will exit with an OOM error.
+it is possible that `polygon-rosetta` will exit with an OOM error.
 
 ### Recommended OS Settings
-To increase the load `rosetta-polygon` can handle, it is recommended to tune your OS
+To increase the load `polygon-rosetta` can handle, it is recommended to tune your OS
 settings to allow for more connections. On a linux-based OS, you can run the following
 commands ([source](http://www.tweaked.io/guide/kernel)):
 ```text
@@ -150,14 +149,14 @@ sysctl -w net.ipv4.tcp_max_syn_backlog=10000
 sysctl -w net.core.somaxconn=10000
 sysctl -p (when done)
 ```
-_We have not tested `rosetta-polygon` with `net.ipv4.tcp_tw_recycle` and do not recommend
+_We have not tested `polygon-rosetta` with `net.ipv4.tcp_tw_recycle` and do not recommend
 enabling it._
 
 You should also modify your open file settings to `100000`. This can be done on a linux-based OS
 with the command: `ulimit -n 100000`.
 
 ## Testing with rosetta-cli
-To validate `rosetta-polygon`, [install `rosetta-cli`](https://github.com/coinbase/rosetta-cli#install)
+To validate `polygon-rosetta`, [install `rosetta-cli`](https://github.com/coinbase/rosetta-cli#install)
 and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/testnet/config.json`
 * `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json`

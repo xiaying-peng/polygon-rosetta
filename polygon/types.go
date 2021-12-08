@@ -112,7 +112,7 @@ const (
 	// of a transfer.
 	TransferGasLimit = uint64(21000) //nolint:gomnd
 
-	// IncludeMempoolCoins does not apply to rosetta-polygon as it is not UTXO-based.
+	// IncludeMempoolCoins does not apply to polygon-rosetta as it is not UTXO-based.
 	IncludeMempoolCoins = false
 
 	// ContractAddressKey is the key used to denote the contract address

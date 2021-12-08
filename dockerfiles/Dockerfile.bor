@@ -1,9 +1,9 @@
 FROM golang:1.17 as builder
 
-RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang-3.9 tzdata
+RUN apt-get update && apt-get install -y build-essential curl make gcc g++ git fio cmake clang tzdata
 
-ARG BOR_VERSION="0.2.10"
-ARG BOR_COMMIT_HASH="908cbbf632d2f095315a57611478152340f01f38"
+ARG BOR_VERSION="0.2.12-beta3"
+ARG BOR_COMMIT_HASH="488ea2bcb4d9771e05b1fad12d8b86562558aab5"
 
 # Build Bor
 RUN git clone https://github.com/maticnetwork/bor.git /root/bor && \

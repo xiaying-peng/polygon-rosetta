@@ -20,7 +20,7 @@ set -e
 usage() {
   this=$1
   cat <<EOF
-$this: download pre-compiled Docker images for coinbase/rosetta-polygon
+$this: download pre-compiled Docker images for maticnetwork/polygon-rosetta
 
 Usage: $this [-d]
   -d turns on debug logging
@@ -44,8 +44,8 @@ execute() {
   log_info "downloading image into ${tmpdir}"
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}" "" "1"
   docker load --input "${tmpdir}/${TARBALL}"
-  docker tag "rosetta-polygon:${TAG}" "rosetta-polygon:latest"
-  log_info "loaded rosetta-polygon:${TAG} and tagged as rosetta-polygon:latest"
+  docker tag "polygon-rosetta:${TAG}" "polygon-rosetta:latest"
+  log_info "loaded polygon-rosetta:${TAG} and tagged as polygon-rosetta:latest"
   rm -rf "${tmpdir}"
   log_info "removed temporary directory ${tmpdir}"
 }
@@ -196,10 +196,10 @@ End of functions from https://github.com/client9/shlib
 ------------------------------------------------------------------------
 EOF
 
-BINARY=rosetta-polygon
+BINARY=polygon-rosetta
 FORMAT=tar.gz
-OWNER=coinbase
-REPO="rosetta-polygon"
+OWNER=maticnetwork
+REPO="polygon-rosetta"
 PREFIX="$OWNER/$REPO"
 
 # use in logging routines

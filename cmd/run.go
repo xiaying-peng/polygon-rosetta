@@ -51,7 +51,7 @@ const (
 var (
 	runCmd = &cobra.Command{
 		Use:   "run",
-		Short: "Run rosetta-polygon",
+		Short: "Run polygon-rosetta",
 		RunE:  runRunCmd,
 	}
 )
@@ -120,7 +120,7 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 
 	err = g.Wait()
 	if SignalReceived {
-		return errors.New("rosetta-polygon halted")
+		return errors.New("polygon-rosetta halted")
 	}
 
 	return err

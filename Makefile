@@ -118,9 +118,6 @@ check-format:
 	! gofmt -s -l . | read
 	! ${GOIMPORTS_CMD} -l . | read
 
-salus:
-	docker run --rm -t -v ${PWD}:/home/repo coinbase/salus
-
 spellcheck:
 	${SPELLCHECK_CMD} -error .
 

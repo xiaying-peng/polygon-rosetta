@@ -67,7 +67,7 @@ const (
 	PortEnv = "PORT"
 
 	// BorEnv is an optional environment variable
-	// used to connect rosetta-polygon to an already
+	// used to connect polygon-rosetta to an already
 	// running bor node.
 	BorEnv = "BOR"
 
@@ -86,7 +86,7 @@ const (
 	// to geth clients as headers. When not set, defaults to []
 	GethHeadersEnv = "GETH_HEADERS"
 
-	// MiddlewareVersion is the version of rosetta-polygon.
+	// MiddlewareVersion is the version of polygon-rosetta.
 	MiddlewareVersion = "0.0.4"
 
 	// MainnetChainID is the chain ID for Mainnet

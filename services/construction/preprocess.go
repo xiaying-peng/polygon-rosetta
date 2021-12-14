@@ -18,14 +18,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"reflect"
+	"strconv"
+	"strings"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/parser"
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/maticnetwork/polygon-rosetta/polygon"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
 // ConstructionPreprocess implements the /construction/preprocess
@@ -87,28 +91,9 @@ func (a *APIService) ConstructionPreprocess(
 		preprocessOutputOptions.Nonce = bigObj
 	}
 
-	// Override gas_price
-	if v, ok := request.Metadata["gas_price"]; ok {
-		stringObj, ok := v.(string)
-		if !ok {
-			return nil, svcErrors.WrapErr(
-				svcErrors.ErrInvalidGasPrice,
-				fmt.Errorf("%s is not a valid gas_price string", v),
-			)
-		}
-		bigObj, ok := new(big.Int).SetString(stringObj, 10) //nolint:gomnd
-		if !ok {
-			return nil, svcErrors.WrapErr(
-				svcErrors.ErrInvalidGasPrice,
-				fmt.Errorf("%s is not a valid gas_price", v),
-			)
-		}
-		preprocessOutputOptions.GasPrice = bigObj
-	}
-
 	// Only supports ERC20 transfers
 	currency := fromOp.Amount.Currency
-	if !isNativeCurrency(currency) {
+	if _, ok := request.Metadata["method_signature"]; !ok && !isNativeCurrency(currency) {
 		tokenContractAddress, err := getTokenContractAddress(currency)
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrInvalidTokenContractAddress, err)
@@ -122,6 +107,36 @@ func (a *APIService) ConstructionPreprocess(
 		preprocessOutputOptions.TokenAddress = tokenContractAddress
 		preprocessOutputOptions.Data = data
 		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 when sending ERC20
+	}
+
+	if v, ok := request.Metadata["method_signature"]; ok {
+		methodSigStringObj := v.(string)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidSignature,
+				fmt.Errorf("%s is not a valid signature string", v),
+			)
+		}
+		contractAddress, ok := request.Metadata["contract_address"].(string)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidAddress,
+				fmt.Errorf("%s is not a valid string", contractAddress),
+			)
+		}
+		methodArgs, ok := request.Metadata["method_args"].([]string)
+		if !ok {
+			err := errors.New("invalid method arguments")
+			return nil, svcErrors.WrapErr(svcErrors.ErrCallParametersInvalid, err)
+		}
+		data, err := constructcontractCallData(methodSigStringObj, methodArgs)
+		if err != nil {
+			return nil, svcErrors.WrapErr(svcErrors.ErrFetchFunctionSignatureMethodID, err)
+		}
+		preprocessOutputOptions.TokenAddress = contractAddress
+		preprocessOutputOptions.Data = data
+		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 when sending ERC20
+
 	}
 
 	marshaled, err := marshalJSONMap(preprocessOutputOptions)
@@ -237,3 +252,81 @@ func constructERC20TransferData(to string, value *big.Int) ([]byte, error) {
 
 	return data, nil
 }
+
+// constructcontractCallData constructs the data field of a Polygon
+// transaction
+func constructcontractCallData(methodSig string, methodArgs []string) ([]byte, error) {
+
+	methodID, err := contractCallMethodID(methodSig)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []byte
+	data = append(data, methodID...)
+
+	splitSigBypranthesis := strings.Split(methodSig, "(")
+	splitSigByAnotherParanth := strings.Split(splitSigBypranthesis[1], ")")
+	splitSigByComma := strings.Split(splitSigByAnotherParanth[0], ",")
+
+	for i, v := range splitSigByComma {
+		typed, _ := abi.NewType(v, v, nil)
+		arguments := abi.Arguments{
+			{
+				Type: typed,
+			},
+		}
+		if v == "address" {
+			value := common.HexToAddress(methodArgs[i])
+			bytes, _ := arguments.Pack(
+				value,
+			)
+			fmt.Println(bytes)
+			data = append(data, bytes...)
+		}
+		if strings.HasPrefix(v, "uint") || strings.HasPrefix(v, "int") {
+			value := new(big.Int)
+			value.SetString(methodArgs[i], 10)
+			bytes, _ := arguments.Pack(
+				value,
+			)
+			fmt.Println(bytes)
+			data = append(data, bytes...)
+		}
+		if strings.HasPrefix(v, "bytes") {
+			value := [32]byte{}
+			copy(value[:], []byte(methodArgs[i]))
+			bytes, _ := arguments.Pack(
+				value,
+			)
+			fmt.Println(bytes)
+			data = append(data, bytes...)
+		}
+		if strings.HasPrefix(v, "string") {
+			bytes, _ := arguments.Pack(
+				methodArgs[i],
+			)
+			fmt.Println(bytes)
+			data = append(data, bytes...)
+		}
+		if strings.HasPrefix(v, "bool") {
+			value, _ := strconv.ParseBool(methodArgs[i])
+			if err != nil {
+				log.Fatal(err)
+			}
+			bytes, _ := arguments.Pack(
+				value,
+			)
+			fmt.Println("in bool", bytes)
+			data = append(data, bytes...)
+		}
+
+	}
+	fmt.Println("final data:", data)
+
+	// condition needs to be added splitByComma and Args length should be same
+
+	return data, nil
+}
+
+//

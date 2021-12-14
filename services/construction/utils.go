@@ -20,10 +20,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
-
+	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -132,5 +131,31 @@ func rosettaOperations(
 				Currency: currency,
 			},
 		},
+	}
+}
+
+// contractCallMethodID calculates the first 4 bytes of the method
+// signature for function call on contract
+func contractCallMethodID(methodSig string) ([]byte, error) {
+	fnSignature := []byte(methodSig)
+	hash := sha3.NewLegacyKeccak256()
+	if _, err := hash.Write(fnSignature); err != nil {
+		return nil, err
+	}
+
+	return hash.Sum(nil)[:4], nil
+}
+
+func hasTransferData(data []byte) bool {
+	methodID := data[:4]
+	transferFnSignature := []byte("transfer(address,uint256)")
+	hash := sha3.NewLegacyKeccak256()
+	hash.Write(transferFnSignature)
+	transfetMethodID := hash.Sum(nil)[:4]
+	res := bytes.Compare(methodID, transfetMethodID)
+	if res == 0 {
+		return true
+	} else {
+		return false
 	}
 }

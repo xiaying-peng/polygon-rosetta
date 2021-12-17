@@ -77,6 +77,31 @@
                 "decimals": 18
               }
             }
+          },
+          {
+            "operation_identifier": {
+              "index": 2
+            },
+            "related_operations": [
+              {
+                "index": 0
+              },
+              {
+                "index": 1
+              }
+            ],
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
+            },
+            "amount": {
+              "value": "7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
           }
         ],
         "metadata": {
@@ -172,6 +197,31 @@
             "operation_identifier": {
               "index": 2
             },
+            "related_operations": [
+              {
+                "index": 0
+              },
+              {
+                "index": 1
+              }
+            ],
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
+            },
+            "amount": {
+              "value": "7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "type": "",
             "status": "SUCCESS",
             "account": {
@@ -180,11 +230,11 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "related_operations": [
               {
-                "index": 2
+                "index": 3
               }
             ],
             "type": "",
@@ -263,6 +313,31 @@
             "operation_identifier": {
               "index": 2
             },
+            "related_operations": [
+              {
+                "index": 0
+              },
+              {
+                "index": 1
+              }
+            ],
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
+            },
+            "amount": {
+              "value": "7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "type": "",
             "status": "SUCCESS",
             "account": {
@@ -271,11 +346,11 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "related_operations": [
               {
-                "index": 2
+                "index": 3
               }
             ],
             "type": "",
@@ -371,6 +446,31 @@
             "operation_identifier": {
               "index": 2
             },
+            "related_operations": [
+              {
+                "index": 0
+              },
+              {
+                "index": 1
+              }
+            ],
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
+            },
+            "amount": {
+              "value": "7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "type": "",
             "status": "SUCCESS",
             "account": {
@@ -379,11 +479,11 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "related_operations": [
               {
-                "index": 2
+                "index": 3
               }
             ],
             "type": "",

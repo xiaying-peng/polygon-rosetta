@@ -96,6 +96,9 @@ func createMockClient(ctx context.Context, t *testing.T) (*mockClient, error) {
 		currencyFetcher: cf,
 		p:               params.RopstenChainConfig,
 		traceSemaphore:  semaphore.NewWeighted(100), //nolint
+		burntContract: map[string]string{
+			"22640000": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38",
+		},
 	}
 
 	return &mockClient{

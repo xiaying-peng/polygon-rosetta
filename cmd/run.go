@@ -86,7 +86,13 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 	var client *polygon.Client
 	if cfg.Mode == configuration.Online {
 		var err error
-		client, err = polygon.NewClient(cfg.BorURL, cfg.Params, cfg.SkipGethAdmin, cfg.GethHeaders)
+		client, err = polygon.NewClient(&polygon.ClientConfig{
+			URL:            cfg.BorURL,
+			ChainConfig:    cfg.Params,
+			SkipAdminCalls: cfg.SkipGethAdmin,
+			Headers:        cfg.GethHeaders,
+			BurntContract:  cfg.BurntContract,
+		})
 		if err != nil {
 			return fmt.Errorf("%w: cannot initialize polygon client", err)
 		}

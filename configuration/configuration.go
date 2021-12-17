@@ -109,6 +109,9 @@ type Configuration struct {
 
 	// Block Reward Data
 	Params *params.ChainConfig
+
+	// Governance contract where the token will be sent to and burnt in london fork
+	BurntContract map[string]string
 }
 
 // LoadConfiguration attempts to create a new Configuration
@@ -138,6 +141,9 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = polygon.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
 		config.Params.ChainID.SetString(MainnetChainID, 10)
+		config.BurntContract = map[string]string{
+			"0": "0x0000000000000000000000000000000000000000",
+		} // TODO add burn contract and block when mainnet forks to support EIP-1559
 	case Testnet, Mumbai:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: polygon.Blockchain,
@@ -146,6 +152,9 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = polygon.MumbaiGenesisBlockIdentifier
 		config.Params = params.GoerliChainConfig
 		config.Params.ChainID.SetString(MumbaiChainID, 10)
+		config.BurntContract = map[string]string{
+			"22640000": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38",
+		}
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:

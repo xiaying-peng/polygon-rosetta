@@ -70,6 +70,7 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 		[]*types.NetworkIdentifier{cfg.Network},
 		polygon.CallMethods,
 		polygon.IncludeMempoolCoins,
+		"",
 	)
 	if err != nil {
 		return fmt.Errorf("%w: could not initialize server asserter", err)

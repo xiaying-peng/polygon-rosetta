@@ -21,12 +21,12 @@ import (
 	"io/ioutil"
 	"testing"
 
-	mocks "github.com/maticnetwork/polygon-rosetta/mocks/polygon"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
+	mocks "github.com/maticnetwork/polygon-rosetta/mocks/polygon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/sync/semaphore"
@@ -52,14 +52,14 @@ const (
 	symbolABIEncoded = "0x95d89b41"
 )
 
-func testTraceConfig() (*eth.TraceConfig, error) {
+func testTraceConfig() (*tracers.TraceCallConfig, error) {
 	loadedFile, err := ioutil.ReadFile("call_tracer.js")
 	if err != nil {
 		return nil, fmt.Errorf("%w: could not load tracer file", err)
 	}
 
 	loadedTracer := string(loadedFile)
-	return &eth.TraceConfig{
+	return &tracers.TraceCallConfig{
 		Timeout: &tracerTimeout,
 		Tracer:  &loadedTracer,
 	}, nil

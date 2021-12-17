@@ -18,8 +18,8 @@ import (
 	"context"
 	"testing"
 
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/types"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,7 +46,7 @@ func TestConstructionHash(t *testing.T) {
 		"error: invalid transaction": {
 			request: templateHashRequest("{}"),
 			expectedError: templateError(
-				svcErrors.ErrUnableToParseIntermediateResult, "missing required field 'nonce' for txdata"),
+				svcErrors.ErrUnableToParseIntermediateResult, "missing required field 'nonce' in transaction"),
 		},
 	}
 

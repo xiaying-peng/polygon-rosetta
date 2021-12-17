@@ -19,10 +19,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/maticnetwork/polygon-rosetta/polygon"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
 // ConstructionParse implements the /construction/parse endpoint.
@@ -51,7 +51,7 @@ func (a *APIService) ConstructionParse(
 		tx.GasLimit = t.Gas()
 		tx.ChainID = t.ChainId()
 
-		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()))
+		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()), nil)
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 		}

@@ -34,7 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	EthTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -68,7 +68,7 @@ const (
 // Client borrows HEAVILY from https://github.com/ethereum/go-ethereum/tree/master/ethclient.
 type Client struct {
 	p  *params.ChainConfig
-	tc *eth.TraceConfig
+	tc *tracers.TraceCallConfig
 
 	c JSONRPC
 	g GraphQL

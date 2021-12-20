@@ -59,6 +59,10 @@ const (
 	// that do not contain 3 topics and who's `data` field is not a single 32 byte hex string
 	// representing the amount of the transfer
 	numTopicsERC20Transfer = 3
+
+	// eip1559TxType is the EthTypes.Transaction.Type() value that indicates this transaction
+	// follows EIP-1559.
+	eip1559TxType = 2
 )
 
 // Client allows for querying a set of specific Ethereum endpoints in an
@@ -350,7 +354,7 @@ func (ec *Client) getBlock(
 	for i, tx := range body.Transactions {
 		txs[i] = tx.tx
 		var gasPrice *big.Int
-		if txs[i].Type() == 2 {
+		if txs[i].Type() == eip1559TxType {
 			// Handle EIP-1559 fee computation
 			tip, err := txs[i].EffectiveGasTip(head.BaseFee)
 			if err != nil {
@@ -946,7 +950,7 @@ type loadedTransaction struct {
 
 func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
 	minerEarnedAmount := new(big.Int).Set(tx.FeeAmount)
-	if tx.Transaction.Type() == 2 {
+	if tx.Transaction.Type() == eip1559TxType {
 		if baseFee == nil {
 			log.Fatalf("base fee cannot be nil for EIP-1559 transaction type")
 		}

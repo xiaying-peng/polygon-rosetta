@@ -950,14 +950,11 @@ type loadedTransaction struct {
 
 func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
 	minerEarnedAmount := new(big.Int).Set(tx.FeeAmount)
-	if tx.Transaction.Type() == eip1559TxType {
-		if baseFee == nil {
-			log.Fatalf("base fee cannot be nil for EIP-1559 transaction type")
-		}
-		// For EIP-1559 transactions, baseFee is burned and hence should not be paid to the miner.
+	if baseFee != nil {
+		// baseFee is burned and hence should not be paid to the miner.
 		minerEarnedAmount.Sub(tx.FeeAmount, baseFee)
+		// TODO: create operation that sends baseFee to the burn contract address
 	}
-	// TODO: create operation that sends baseFee to the burn contract address
 	return []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{

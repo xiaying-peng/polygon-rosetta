@@ -71,7 +71,7 @@
               "address": "0xbe188D6641E8b680743A4815dFA0f6208038960F"
             },
             "amount": {
-              "value": "731850000000000",
+              "value": "731849999999993",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18

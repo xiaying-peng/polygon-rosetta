@@ -59,6 +59,10 @@ const (
 	// that do not contain 3 topics and who's `data` field is not a single 32 byte hex string
 	// representing the amount of the transfer
 	numTopicsERC20Transfer = 3
+
+	// eip1559TxType is the EthTypes.Transaction.Type() value that indicates this transaction
+	// follows EIP-1559.
+	eip1559TxType = 2
 )
 
 // Client allows for querying a set of specific Ethereum endpoints in an
@@ -349,9 +353,20 @@ func (ec *Client) getBlock(
 	loadedTxs := make([]*loadedTransaction, len(body.Transactions))
 	for i, tx := range body.Transactions {
 		txs[i] = tx.tx
+		var gasPrice *big.Int
+		if txs[i].Type() == eip1559TxType {
+			// Handle EIP-1559 fee computation
+			tip, err := txs[i].EffectiveGasTip(head.BaseFee)
+			if err != nil {
+				return nil, nil, fmt.Errorf("%w: failure getting effective gas tip", err)
+			}
+			gasPrice = new(big.Int).Add(tip, head.BaseFee)
+		} else {
+			gasPrice = txs[i].GasPrice()
+		}
 		receipt := receipts[i]
 		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-		feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
+		feeAmount := gasUsedBig.Mul(gasUsedBig, gasPrice)
 
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
@@ -933,7 +948,13 @@ type loadedTransaction struct {
 	Receipt  *types.Receipt
 }
 
-func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
+func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
+	minerEarnedAmount := new(big.Int).Set(tx.FeeAmount)
+	if baseFee != nil {
+		// baseFee is burned and hence should not be paid to the miner.
+		minerEarnedAmount.Sub(tx.FeeAmount, baseFee)
+		// TODO: create operation that sends baseFee to the burn contract address
+	}
 	return []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -965,7 +986,7 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Address: MustChecksum(tx.Author),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    tx.FeeAmount.String(),
+				Value:    minerEarnedAmount.String(),
 				Currency: Currency,
 			},
 		},
@@ -1051,7 +1072,7 @@ func (ec *Client) populateTransactions(
 	)
 
 	for i, tx := range loadedTransactions {
-		transaction, err := ec.populateTransaction(ctx, tx)
+		transaction, err := ec.populateTransaction(ctx, tx, block.BaseFee())
 		if err != nil {
 			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
 		}
@@ -1065,11 +1086,12 @@ func (ec *Client) populateTransactions(
 func (ec *Client) populateTransaction(
 	ctx context.Context,
 	tx *loadedTransaction,
+	baseFee *big.Int,
 ) (*RosettaTypes.Transaction, error) {
 	ops := []*RosettaTypes.Operation{}
 
 	// Compute fee operations
-	feeOps := feeOps(tx)
+	feeOps := feeOps(tx, baseFee)
 	ops = append(ops, feeOps...)
 
 	// Compute tx operations via tx.Receipt logs for ERC20 transfers

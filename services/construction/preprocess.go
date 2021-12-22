@@ -16,6 +16,7 @@ package construction
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -124,18 +125,23 @@ func (a *APIService) ConstructionPreprocess(
 				fmt.Errorf("%s is not a valid string", contractAddress),
 			)
 		}
-		methodArgs, ok := request.Metadata["method_args"].([]string)
-		if !ok {
-			err := errors.New("invalid method arguments")
-			return nil, svcErrors.WrapErr(svcErrors.ErrCallParametersInvalid, err)
+		var methodArgs []string
+		if v, ok := request.Metadata["method_args"]; ok {
+			methodArgsBytes, _ := json.Marshal(v)
+			err := json.Unmarshal(methodArgsBytes, &methodArgs)
+			if err != nil {
+				fmt.Println("Error in unmarshal")
+			}
 		}
-		data, err := constructcontractCallData(methodSigStringObj, methodArgs)
+		fmt.Println(methodArgs)
+		fmt.Printf("type: %T\n", methodArgs)
+		data, err := constructContractCallData(methodSigStringObj, methodArgs)
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrFetchFunctionSignatureMethodID, err)
 		}
 		preprocessOutputOptions.TokenAddress = contractAddress
 		preprocessOutputOptions.Data = data
-		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 when sending ERC20
+		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 in any contract call
 
 	}
 
@@ -253,9 +259,9 @@ func constructERC20TransferData(to string, value *big.Int) ([]byte, error) {
 	return data, nil
 }
 
-// constructcontractCallData constructs the data field of a Polygon
+// constructContractCallData constructs the data field of a Polygon
 // transaction
-func constructcontractCallData(methodSig string, methodArgs []string) ([]byte, error) {
+func constructContractCallData(methodSig string, methodArgs []string) ([]byte, error) {
 
 	methodID, err := contractCallMethodID(methodSig)
 	if err != nil {
@@ -265,9 +271,16 @@ func constructcontractCallData(methodSig string, methodArgs []string) ([]byte, e
 	var data []byte
 	data = append(data, methodID...)
 
-	splitSigBypranthesis := strings.Split(methodSig, "(")
-	splitSigByAnotherParanth := strings.Split(splitSigBypranthesis[1], ")")
-	splitSigByComma := strings.Split(splitSigByAnotherParanth[0], ",")
+	splitSigByLeadingParenthesis := strings.Split(methodSig, "(")
+	if len(splitSigByLeadingParenthesis) < 2 {
+		return data, nil
+	}
+	splitSigByLastParanthesis := strings.Split(splitSigByLeadingParenthesis[1], ")")
+	if len(splitSigByLastParanthesis) < 1 {
+		return data, nil
+	}
+	splitSigByComma := strings.Split(splitSigByLastParanthesis[0], ",")
+	fmt.Println(splitSigByComma)
 
 	for i, v := range splitSigByComma {
 		typed, _ := abi.NewType(v, v, nil)
@@ -276,49 +289,61 @@ func constructcontractCallData(methodSig string, methodArgs []string) ([]byte, e
 				Type: typed,
 			},
 		}
-		if v == "address" {
-			value := common.HexToAddress(methodArgs[i])
-			bytes, _ := arguments.Pack(
-				value,
-			)
-			fmt.Println(bytes)
-			data = append(data, bytes...)
-		}
-		if strings.HasPrefix(v, "uint") || strings.HasPrefix(v, "int") {
-			value := new(big.Int)
-			value.SetString(methodArgs[i], 10)
-			bytes, _ := arguments.Pack(
-				value,
-			)
-			fmt.Println(bytes)
-			data = append(data, bytes...)
-		}
-		if strings.HasPrefix(v, "bytes") {
-			value := [32]byte{}
-			copy(value[:], []byte(methodArgs[i]))
-			bytes, _ := arguments.Pack(
-				value,
-			)
-			fmt.Println(bytes)
-			data = append(data, bytes...)
-		}
-		if strings.HasPrefix(v, "string") {
-			bytes, _ := arguments.Pack(
-				methodArgs[i],
-			)
-			fmt.Println(bytes)
-			data = append(data, bytes...)
-		}
-		if strings.HasPrefix(v, "bool") {
-			value, _ := strconv.ParseBool(methodArgs[i])
-			if err != nil {
-				log.Fatal(err)
+		switch {
+		case v == "address":
+			{
+				fmt.Println("in address case")
+				value := common.HexToAddress(methodArgs[i])
+				bytes, _ := arguments.Pack(
+					value,
+				)
+				fmt.Println(bytes)
+				data = append(data, bytes...)
 			}
-			bytes, _ := arguments.Pack(
-				value,
-			)
-			fmt.Println("in bool", bytes)
-			data = append(data, bytes...)
+		case strings.HasPrefix(v, "uint") || strings.HasPrefix(v, "int"):
+			{
+				fmt.Println("in int case")
+				value := new(big.Int)
+				value.SetString(methodArgs[i], 10)
+				bytes, _ := arguments.Pack(
+					value,
+				)
+				fmt.Println(bytes)
+				data = append(data, bytes...)
+			}
+		case strings.HasPrefix(v, "bytes"):
+			{
+				fmt.Println("in bytes case")
+				value := [32]byte{}
+				copy(value[:], []byte(methodArgs[i]))
+				bytes, _ := arguments.Pack(
+					value,
+				)
+				fmt.Println(bytes)
+				data = append(data, bytes...)
+			}
+		case strings.HasPrefix(v, "string"):
+			{
+				bytes, _ := arguments.Pack(
+					methodArgs[i],
+				)
+				fmt.Println(bytes)
+				data = append(data, bytes...)
+			}
+		case strings.HasPrefix(v, "bool"):
+			{
+				fmt.Println("in bool case")
+				value, err := strconv.ParseBool(methodArgs[i])
+				if err != nil {
+					log.Fatal(err)
+				}
+				bytes, _ := arguments.Pack(
+					value,
+				)
+				fmt.Println("in bool", bytes)
+				data = append(data, bytes...)
+			}
+
 		}
 
 	}

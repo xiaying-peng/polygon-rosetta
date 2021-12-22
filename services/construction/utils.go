@@ -148,11 +148,8 @@ func contractCallMethodID(methodSig string) ([]byte, error) {
 
 func hasTransferData(data []byte) bool {
 	methodID := data[:4]
-	transferFnSignature := []byte("transfer(address,uint256)")
-	hash := sha3.NewLegacyKeccak256()
-	hash.Write(transferFnSignature)
-	transfetMethodID := hash.Sum(nil)[:4]
-	res := bytes.Compare(methodID, transfetMethodID)
+	expectedMethodID, _ := erc20TransferMethodID()
+	res := bytes.Compare(methodID, expectedMethodID)
 	if res == 0 {
 		return true
 	} else {

@@ -275,11 +275,11 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 	if len(splitSigByLeadingParenthesis) < 2 {
 		return data, nil
 	}
-	splitSigByLastParanthesis := strings.Split(splitSigByLeadingParenthesis[1], ")")
-	if len(splitSigByLastParanthesis) < 1 {
+	splitSigByTrailingParenthesis := strings.Split(splitSigByLeadingParenthesis[1], ")")
+	if len(splitSigByTrailingParenthesis) < 1 {
 		return data, nil
 	}
-	splitSigByComma := strings.Split(splitSigByLastParanthesis[0], ",")
+	splitSigByComma := strings.Split(splitSigByTrailingParenthesis[0], ",")
 	fmt.Println(splitSigByComma)
 
 	for i, v := range splitSigByComma {

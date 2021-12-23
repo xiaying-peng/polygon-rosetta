@@ -24,6 +24,7 @@ import (
 	"math/big"
 	"net/http"
 	"reflect"
+	"sort"
 	"strconv"
 	"time"
 
@@ -82,18 +83,28 @@ type Client struct {
 	traceSemaphore *semaphore.Weighted
 
 	skipAdminCalls bool
+
+	burntContract map[string]string
+}
+
+type ClientConfig struct {
+	URL            string
+	ChainConfig    *params.ChainConfig
+	SkipAdminCalls bool
+	Headers        []*HTTPHeader
+	BurntContract  map[string]string
 }
 
 // NewClient creates a Client that from the provided url and params.
-func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool, headers []*HTTPHeader) (*Client, error) {
-	c, err := rpc.DialHTTPWithClient(url, &http.Client{
+func NewClient(cfg *ClientConfig) (*Client, error) {
+	c, err := rpc.DialHTTPWithClient(cfg.URL, &http.Client{
 		Timeout: gethHTTPTimeout,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%w: unable to dial node", err)
 	}
 
-	for _, header := range headers {
+	for _, header := range cfg.Headers {
 		c.SetHeader(header.Key, header.Value)
 	}
 
@@ -102,7 +113,7 @@ func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool, head
 		return nil, fmt.Errorf("%w: unable to load trace config", err)
 	}
 
-	g, err := newGraphQLClient(url, headers)
+	g, err := newGraphQLClient(cfg.URL, cfg.Headers)
 	if err != nil {
 		return nil, fmt.Errorf("%w: unable to create GraphQL client", err)
 	}
@@ -113,13 +124,14 @@ func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool, head
 	}
 
 	return &Client{
-		p:               params,
+		p:               cfg.ChainConfig,
 		tc:              tc,
 		c:               c,
 		g:               g,
 		currencyFetcher: currencyFetcher,
 		traceSemaphore:  semaphore.NewWeighted(maxTraceConcurrency),
-		skipAdminCalls:  skipAdminCalls,
+		skipAdminCalls:  cfg.SkipAdminCalls,
+		burntContract:   cfg.BurntContract,
 	}, nil
 }
 
@@ -948,14 +960,14 @@ type loadedTransaction struct {
 	Receipt  *types.Receipt
 }
 
-func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
+func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*RosettaTypes.Operation {
 	minerEarnedAmount := new(big.Int).Set(tx.FeeAmount)
+	baseFee := block.BaseFee()
 	if baseFee != nil {
 		// baseFee is burned and hence should not be paid to the miner.
 		minerEarnedAmount.Sub(tx.FeeAmount, baseFee)
-		// TODO: create operation that sends baseFee to the burn contract address
 	}
-	return []*RosettaTypes.Operation{
+	rOps := []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 0,
@@ -970,7 +982,6 @@ func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
 				Currency: Currency,
 			},
 		},
-
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 1,
@@ -991,6 +1002,34 @@ func feeOps(tx *loadedTransaction, baseFee *big.Int) []*RosettaTypes.Operation {
 			},
 		},
 	}
+	if baseFee != nil {
+		// Burn the base fee for EIP-1559 transactions by sending it to the burn contract address
+		burntContract := ec.CalculateBurntContract(block.NumberU64())
+		op := &RosettaTypes.Operation{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: 2,
+			},
+			RelatedOperations: []*RosettaTypes.OperationIdentifier{
+				{
+					Index: 0,
+				},
+				{
+					Index: 1,
+				},
+			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(burntContract),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    baseFee.String(),
+				Currency: Currency,
+			},
+		}
+		rOps = append(rOps, op)
+	}
+	return rOps
 }
 
 // transactionReceipt returns the receipt of a transaction by transaction hash.
@@ -1072,7 +1111,7 @@ func (ec *Client) populateTransactions(
 	)
 
 	for i, tx := range loadedTransactions {
-		transaction, err := ec.populateTransaction(ctx, tx, block.BaseFee())
+		transaction, err := ec.populateTransaction(ctx, tx, block)
 		if err != nil {
 			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
 		}
@@ -1086,12 +1125,12 @@ func (ec *Client) populateTransactions(
 func (ec *Client) populateTransaction(
 	ctx context.Context,
 	tx *loadedTransaction,
-	baseFee *big.Int,
+	block *EthTypes.Block,
 ) (*RosettaTypes.Transaction, error) {
 	ops := []*RosettaTypes.Operation{}
 
 	// Compute fee operations
-	feeOps := feeOps(tx, baseFee)
+	feeOps := ec.feeOps(tx, block)
 	ops = append(ops, feeOps...)
 
 	// Compute tx operations via tx.Receipt logs for ERC20 transfers
@@ -1499,4 +1538,25 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
 	}
 	return arg
+}
+
+// This implementation is taken from:
+// https://github.com/maticnetwork/bor/blob/c227a072418626dd758ceabffd2ea7dadac6eecb/params/config.go#L527
+//
+// TODO: Depend on maticnetwork fork of go-ethereum instead of stock geth so we don't need to
+// copy/paste this.
+func (ec *Client) CalculateBurntContract(blockNum uint64) string {
+	keys := make([]string, 0, len(ec.burntContract))
+	for k := range ec.burntContract {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for i := 0; i < len(keys)-1; i++ {
+		valUint, _ := strconv.ParseUint(keys[i], 10, 64)
+		valUintNext, _ := strconv.ParseUint(keys[i+1], 10, 64)
+		if blockNum > valUint && blockNum < valUintNext {
+			return ec.burntContract[keys[i]]
+		}
+	}
+	return ec.burntContract[keys[len(keys)-1]]
 }

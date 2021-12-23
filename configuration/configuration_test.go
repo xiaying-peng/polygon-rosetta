@@ -68,6 +68,9 @@ func TestLoadConfiguration(t *testing.T) {
 				BorURL:                 DefaultBorURL,
 				SkipGethAdmin:          false,
 				GethHeaders:            nil,
+				BurntContract: map[string]string{
+					"0": "0x0000000000000000000000000000000000000000",
+				},
 			},
 		},
 		"all set (mainnet) + geth": {
@@ -93,6 +96,9 @@ func TestLoadConfiguration(t *testing.T) {
 					{Key: "X-Auth-Token", Value: "12345-ABCDE"},
 					{Key: "X-Api-Version", Value: "2"},
 				},
+				BurntContract: map[string]string{
+					"0": "0x0000000000000000000000000000000000000000",
+				},
 			},
 		},
 		"all set (mumbai)": {
@@ -115,6 +121,9 @@ func TestLoadConfiguration(t *testing.T) {
 				GethHeaders: []*polygon.HTTPHeader{
 					{Key: "X-Auth-Token", Value: "12345-ABCDE"},
 					{Key: "X-Api-Version", Value: "2"},
+				},
+				BurntContract: map[string]string{
+					"22640000": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38",
 				},
 			},
 		},

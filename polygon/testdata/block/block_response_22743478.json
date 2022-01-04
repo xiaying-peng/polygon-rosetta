@@ -49,7 +49,7 @@
               "address": "0xEF4e5750a803741c0B9Ed8b6aF356192a1769b85"
             },
             "amount": {
-              "value": "-731850000000000",
+              "value": "-731849999999993",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -82,12 +82,26 @@
             "operation_identifier": {
               "index": 2
             },
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0xEF4e5750a803741c0B9Ed8b6aF356192a1769b85"
+            },
+            "amount": {
+              "value": "-7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "related_operations": [
               {
-                "index": 0
-              },
-              {
-                "index": 1
+                "index": 2
               }
             ],
             "type": "FEE",
@@ -164,7 +178,7 @@
               "address": "0x7b8821555e2763726e4F16a3c21D68B4683F1CDF"
             },
             "amount": {
-              "value": "-4350850000000000",
+              "value": "-4350849999999993",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -197,12 +211,26 @@
             "operation_identifier": {
               "index": 2
             },
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x7b8821555e2763726e4F16a3c21D68B4683F1CDF"
+            },
+            "amount": {
+              "value": "-7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "related_operations": [
               {
-                "index": 0
-              },
-              {
-                "index": 1
+                "index": 2
               }
             ],
             "type": "FEE",
@@ -220,7 +248,7 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "type": "",
             "status": "SUCCESS",
@@ -230,11 +258,11 @@
           },
           {
             "operation_identifier": {
-              "index": 4
+              "index": 5
             },
             "related_operations": [
               {
-                "index": 3
+                "index": 4
               }
             ],
             "type": "",
@@ -280,7 +308,7 @@
               "address": "0x7B921b95Fd68E629e03CADaEefc6B842217e3593"
             },
             "amount": {
-              "value": "-53040000148512",
+              "value": "-53040000148505",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -313,12 +341,26 @@
             "operation_identifier": {
               "index": 2
             },
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x7B921b95Fd68E629e03CADaEefc6B842217e3593"
+            },
+            "amount": {
+              "value": "-7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "related_operations": [
               {
-                "index": 0
-              },
-              {
-                "index": 1
+                "index": 2
               }
             ],
             "type": "FEE",
@@ -336,7 +378,7 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "type": "",
             "status": "SUCCESS",
@@ -346,11 +388,11 @@
           },
           {
             "operation_identifier": {
-              "index": 4
+              "index": 5
             },
             "related_operations": [
               {
-                "index": 3
+                "index": 4
               }
             ],
             "type": "",
@@ -413,7 +455,7 @@
               "address": "0x64165472c57771287B957B5399d91AD707c70D72"
             },
             "amount": {
-              "value": "-288387500807485",
+              "value": "-288387500807478",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -446,12 +488,26 @@
             "operation_identifier": {
               "index": 2
             },
+            "type": "FEE",
+            "status": "SUCCESS",
+            "account": {
+              "address": "0x64165472c57771287B957B5399d91AD707c70D72"
+            },
+            "amount": {
+              "value": "-7",
+              "currency": {
+                "symbol": "MATIC",
+                "decimals": 18
+              }
+            }
+          },
+          {
+            "operation_identifier": {
+              "index": 3
+            },
             "related_operations": [
               {
-                "index": 0
-              },
-              {
-                "index": 1
+                "index": 2
               }
             ],
             "type": "FEE",
@@ -469,7 +525,7 @@
           },
           {
             "operation_identifier": {
-              "index": 3
+              "index": 4
             },
             "type": "",
             "status": "SUCCESS",
@@ -479,11 +535,11 @@
           },
           {
             "operation_identifier": {
-              "index": 4
+              "index": 5
             },
             "related_operations": [
               {
-                "index": 3
+                "index": 4
               }
             ],
             "type": "",

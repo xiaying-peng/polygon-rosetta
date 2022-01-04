@@ -978,7 +978,7 @@ func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*Rosett
 				Address: MustChecksum(tx.From.String()),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    new(big.Int).Neg(tx.FeeAmount).String(),
+				Value:    new(big.Int).Neg(minerEarnedAmount).String(),
 				Currency: Currency,
 			},
 		},
@@ -1005,16 +1005,28 @@ func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*Rosett
 	if baseFee != nil {
 		// Burn the base fee for EIP-1559 transactions by sending it to the burn contract address
 		burntContract := ec.CalculateBurntContract(block.NumberU64())
-		op := &RosettaTypes.Operation{
+		debitOp := &RosettaTypes.Operation{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 2,
 			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(tx.From.String()),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    new(big.Int).Neg(baseFee).String(),
+				Currency: Currency,
+			},
+		}
+		rOps = append(rOps, debitOp)
+		creditOp := &RosettaTypes.Operation{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: 3,
+			},
 			RelatedOperations: []*RosettaTypes.OperationIdentifier{
 				{
-					Index: 0,
-				},
-				{
-					Index: 1,
+					Index: 2,
 				},
 			},
 			Type:   FeeOpType,
@@ -1027,7 +1039,7 @@ func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*Rosett
 				Currency: Currency,
 			},
 		}
-		rOps = append(rOps, op)
+		rOps = append(rOps, creditOp)
 	}
 	return rOps
 }

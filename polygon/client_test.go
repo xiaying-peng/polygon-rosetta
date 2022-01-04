@@ -1297,7 +1297,9 @@ func TestBlock(t *testing.T) {
 			correctRaw, err := ioutil.ReadFile(fmt.Sprintf("testdata/block/block_response_%d.json", test.blockNum))
 			assert.NoError(t, err)
 			var correct *RosettaTypes.BlockResponse
-			assert.NoError(t, json.Unmarshal(correctRaw, &correct))
+			if !assert.NoError(t, json.Unmarshal(correctRaw, &correct)) {
+				return
+			}
 
 			resp, err := mockClient.client.Block(
 				ctx,

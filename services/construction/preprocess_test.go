@@ -18,11 +18,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/maticnetwork/polygon-rosetta/polygon"
 	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
-	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"
 )
 

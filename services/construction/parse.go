@@ -62,6 +62,7 @@ func (a *APIService) ConstructionParse(
 	// Native currency
 	currency := polygon.Currency
 
+	//TODO: add logic for contract call parsing
 	// ERC20 currency
 	if hasData(tx.Data) && hasTransferData(tx.Data) {
 		toAdd, amount, err := erc20TransferArgs(tx.Data)

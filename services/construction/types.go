@@ -71,23 +71,27 @@ type Client interface {
 //
 // Value here is MATIC. It will always be 0 for ERC20 tokens
 type options struct {
-	From         string   `json:"from"`
-	Nonce        *big.Int `json:"nonce,omitempty"`
-	Data         []byte   `json:"data,omitempty"`
-	To           string   `json:"to"`
-	TokenAddress string   `json:"token_address,omitempty"`
-	Value        *big.Int `json:"value,omitempty"`
-	GasPrice     *big.Int `json:"gas_price,omitempty"`
+	From            string   `json:"from"`
+	Nonce           *big.Int `json:"nonce,omitempty"`
+	Data            []byte   `json:"data,omitempty"`
+	To              string   `json:"to"`
+	TokenAddress    string   `json:"token_address,omitempty"`
+	Value           *big.Int `json:"value,omitempty"`
+	GasPrice        *big.Int `json:"gas_price,omitempty"`
+	MethodSignature string   `json:"method_signature,omitempty"`
+	MethodArgs      []string `json:"method_args,omitempty"`
 }
 
 type optionsWire struct {
-	From         string `json:"from"`
-	Nonce        string `json:"nonce,omitempty"`
-	Data         string `json:"data,omitempty"`
-	To           string `json:"to"`
-	TokenAddress string `json:"token_address,omitempty"`
-	Value        string `json:"value,omitempty"`
-	GasPrice     string `json:"gas_price,omitempty"`
+	From            string   `json:"from"`
+	Nonce           string   `json:"nonce,omitempty"`
+	Data            string   `json:"data,omitempty"`
+	To              string   `json:"to"`
+	TokenAddress    string   `json:"token_address,omitempty"`
+	Value           string   `json:"value,omitempty"`
+	GasPrice        string   `json:"gas_price,omitempty"`
+	MethodSignature string   `json:"method_signature,omitempty"`
+	MethodArgs      []string `json:"method_args,omitempty"`
 }
 
 func (o *options) MarshalJSON() ([]byte, error) {
@@ -116,6 +120,14 @@ func (o *options) MarshalJSON() ([]byte, error) {
 		ow.GasPrice = hexutil.EncodeBig(o.GasPrice)
 	}
 
+	if len(o.MethodSignature) > 0 {
+		ow.MethodSignature = o.MethodSignature
+	}
+
+	if len(o.MethodArgs) > 0 {
+		ow.MethodArgs = o.MethodArgs
+	}
+
 	return json.Marshal(ow)
 }
 
@@ -127,6 +139,14 @@ func (o *options) UnmarshalJSON(data []byte) error {
 	o.From = ow.From
 	o.To = ow.To
 	o.TokenAddress = ow.TokenAddress
+
+	if len(ow.MethodSignature) > 0 {
+		o.MethodSignature = ow.MethodSignature
+	}
+
+	if len(ow.MethodArgs) > 0 {
+		o.MethodArgs = ow.MethodArgs
+	}
 
 	if len(ow.Nonce) > 0 {
 		nonce, err := hexutil.DecodeBig(ow.Nonce)
@@ -164,21 +184,25 @@ func (o *options) UnmarshalJSON(data []byte) error {
 }
 
 type metadata struct {
-	Nonce    uint64   `json:"nonce"`
-	GasPrice *big.Int `json:"gas_price"`
-	GasLimit *big.Int `json:"gas_limit,omitempty"`
-	Data     []byte   `json:"data,omitempty"`
-	To       string   `json:"to,omitempty"`
-	Value    *big.Int `json:"value,omitempty"`
+	Nonce           uint64   `json:"nonce"`
+	GasPrice        *big.Int `json:"gas_price"`
+	GasLimit        *big.Int `json:"gas_limit,omitempty"`
+	Data            []byte   `json:"data,omitempty"`
+	To              string   `json:"to,omitempty"`
+	Value           *big.Int `json:"value,omitempty"`
+	MethodSignature string   `json:"method_signature,omitempty"`
+	MethodArgs      []string `json:"method_args,omitempty"`
 }
 
 type metadataWire struct {
-	Nonce    string `json:"nonce"`
-	GasPrice string `json:"gas_price"`
-	GasLimit string `json:"gas_limit,omitempty"`
-	Data     string `json:"data,omitempty"`
-	To       string `json:"to,omitempty"`
-	Value    string `json:"value,omitempty"`
+	Nonce           string   `json:"nonce"`
+	GasPrice        string   `json:"gas_price"`
+	GasLimit        string   `json:"gas_limit,omitempty"`
+	Data            string   `json:"data,omitempty"`
+	To              string   `json:"to,omitempty"`
+	Value           string   `json:"value,omitempty"`
+	MethodSignature string   `json:"method_signature,omitempty"`
+	MethodArgs      []string `json:"method_args,omitempty"`
 }
 
 func (m *metadata) MarshalJSON() ([]byte, error) {
@@ -198,6 +222,14 @@ func (m *metadata) MarshalJSON() ([]byte, error) {
 
 	if m.Value != nil {
 		mw.Value = hexutil.EncodeBig(m.Value)
+	}
+
+	if len(m.MethodSignature) > 0 {
+		mw.MethodSignature = m.MethodSignature
+	}
+
+	if len(m.MethodArgs) > 0 {
+		mw.MethodArgs = m.MethodArgs
 	}
 
 	return json.Marshal(mw)
@@ -245,6 +277,14 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Value = value
+	}
+
+	if len(mw.MethodSignature) > 0 {
+		m.MethodSignature = mw.MethodSignature
+	}
+
+	if len(mw.MethodArgs) > 0 {
+		m.MethodArgs = mw.MethodArgs
 	}
 
 	return nil

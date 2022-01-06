@@ -161,10 +161,13 @@ func (a *APIService) ConstructionPreprocess(
 		preprocessOutputOptions.TokenAddress = contractAddress
 		preprocessOutputOptions.Data = data
 		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 in any contract call
+		preprocessOutputOptions.MethodSignature = methodSigStringObj
+		preprocessOutputOptions.MethodArgs = methodArgs
 
 	}
 
 	marshaled, err := marshalJSONMap(preprocessOutputOptions)
+	fmt.Println(marshaled)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 	}

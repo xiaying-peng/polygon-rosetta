@@ -15,6 +15,7 @@
 package construction
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -142,6 +143,17 @@ func validateRequest(
 		// Validate metadata value
 		if metadata.Value.String() != "0" {
 			return errors.New("invalid metadata value")
+		}
+	} else if hasData(metadata.Data) && !hasTransferData(metadata.Data) {
+
+		//contract call
+		data, err := constructContractCallData(metadata.MethodSignature, metadata.MethodArgs)
+		if err != nil {
+			return err
+		}
+		res := bytes.Compare(data, metadata.Data)
+		if res != 0 {
+			return errors.New("invalid data value")
 		}
 	}
 

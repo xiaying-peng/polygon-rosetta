@@ -23,11 +23,11 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 
+	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/maticnetwork/polygon-rosetta/configuration"
 	"github.com/maticnetwork/polygon-rosetta/polygon"
 	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
-	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // ConstructionMetadata implements the /construction/metadata endpoint.
@@ -96,12 +96,14 @@ func (a *APIService) ConstructionMetadata(
 	}
 
 	metadata := &metadata{
-		Nonce:    nonce,
-		GasPrice: gasPrice,
-		GasLimit: big.NewInt(int64(gasLimit)),
-		Data:     input.Data,
-		Value:    input.Value,
-		To:       to,
+		Nonce:           nonce,
+		GasPrice:        gasPrice,
+		GasLimit:        big.NewInt(int64(gasLimit)),
+		Data:            input.Data,
+		Value:           input.Value,
+		To:              to,
+		MethodSignature: input.MethodSignature,
+		MethodArgs:      input.MethodArgs,
 	}
 
 	metadataMap, err := marshalJSONMap(metadata)

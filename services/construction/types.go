@@ -76,6 +76,7 @@ type options struct {
 	Data            []byte   `json:"data,omitempty"`
 	To              string   `json:"to"`
 	TokenAddress    string   `json:"token_address,omitempty"`
+	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           *big.Int `json:"value,omitempty"`
 	GasPrice        *big.Int `json:"gas_price,omitempty"`
 	MethodSignature string   `json:"method_signature,omitempty"`
@@ -88,6 +89,7 @@ type optionsWire struct {
 	Data            string   `json:"data,omitempty"`
 	To              string   `json:"to"`
 	TokenAddress    string   `json:"token_address,omitempty"`
+	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           string   `json:"value,omitempty"`
 	GasPrice        string   `json:"gas_price,omitempty"`
 	MethodSignature string   `json:"method_signature,omitempty"`
@@ -110,6 +112,10 @@ func (o *options) MarshalJSON() ([]byte, error) {
 
 	if len(o.TokenAddress) > 0 {
 		ow.TokenAddress = o.TokenAddress
+	}
+
+	if len(o.ContractAddress) > 0 {
+		ow.ContractAddress = o.ContractAddress
 	}
 
 	if o.Value != nil {
@@ -138,7 +144,14 @@ func (o *options) UnmarshalJSON(data []byte) error {
 	}
 	o.From = ow.From
 	o.To = ow.To
-	o.TokenAddress = ow.TokenAddress
+
+	if len(ow.TokenAddress) > 0 {
+		o.TokenAddress = ow.TokenAddress
+	}
+
+	if len(ow.ContractAddress) > 0 {
+		o.ContractAddress = ow.ContractAddress
+	}
 
 	if len(ow.MethodSignature) > 0 {
 		o.MethodSignature = ow.MethodSignature

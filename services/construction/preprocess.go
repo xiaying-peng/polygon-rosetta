@@ -158,7 +158,7 @@ func (a *APIService) ConstructionPreprocess(
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrFetchFunctionSignatureMethodID, err)
 		}
-		preprocessOutputOptions.TokenAddress = contractAddress
+		preprocessOutputOptions.ContractAddress = contractAddress
 		preprocessOutputOptions.Data = data
 		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 in any contract call
 		preprocessOutputOptions.MethodSignature = methodSigStringObj
@@ -344,14 +344,6 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 				fmt.Println(bytes)
 				data = append(data, bytes...)
 			}
-		case strings.HasPrefix(v, "string"):
-			{
-				bytes, _ := arguments.Pack(
-					methodArgs[i],
-				)
-				fmt.Println(bytes)
-				data = append(data, bytes...)
-			}
 		case strings.HasPrefix(v, "bool"):
 			{
 				fmt.Println("in bool case")
@@ -371,9 +363,5 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 	}
 	fmt.Println("final data:", data)
 
-	// condition needs to be added splitByComma and Args length should be same
-
 	return data, nil
 }
-
-//

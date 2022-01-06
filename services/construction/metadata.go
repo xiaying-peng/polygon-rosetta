@@ -67,12 +67,11 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
-	var checkTokenContractAddress string
 	gasLimit := polygon.TransferGasLimit
 	to := checkTo
 	// Only work for ERC20 transfer
 	if len(input.TokenAddress) > 0 {
-		checkTokenContractAddress, ok = polygon.ChecksumAddress(input.TokenAddress)
+		checkTokenContractAddress, ok := polygon.ChecksumAddress(input.TokenAddress)
 		if !ok {
 			return nil, svcErrors.WrapErr(
 				svcErrors.ErrInvalidAddress,
@@ -84,6 +83,25 @@ func (a *APIService) ConstructionMetadata(
 
 		var err *types.Error
 		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Only work for Generic Contract calls
+	if len(input.ContractAddress) > 0 {
+		checkContractAddress, ok := polygon.ChecksumAddress(input.ContractAddress)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidAddress,
+				fmt.Errorf("%s is not a valid address", input.ContractAddress),
+			)
+		}
+		// Override the destination address to be the contract address
+		to = checkContractAddress
+
+		var err *types.Error
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data)
 		if err != nil {
 			return nil, err
 		}

@@ -152,8 +152,6 @@ func (a *APIService) ConstructionPreprocess(
 				fmt.Println("Error in unmarshal")
 			}
 		}
-		fmt.Println(methodArgs)
-		fmt.Printf("type: %T\n", methodArgs)
 		data, err := constructContractCallData(methodSigStringObj, methodArgs)
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrFetchFunctionSignatureMethodID, err)
@@ -285,6 +283,9 @@ func constructERC20TransferData(to string, value *big.Int) ([]byte, error) {
 // transaction
 func constructContractCallData(methodSig string, methodArgs []string) ([]byte, error) {
 
+	arguments := abi.Arguments{}
+	argumentsData := []interface{}{}
+
 	methodID, err := contractCallMethodID(methodSig)
 	if err != nil {
 		return nil, err
@@ -306,43 +307,34 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 
 	for i, v := range splitSigByComma {
 		typed, _ := abi.NewType(v, v, nil)
-		arguments := abi.Arguments{
+		argument := abi.Arguments{
 			{
 				Type: typed,
 			},
 		}
+
+		arguments = append(arguments, argument...)
+		var argData interface{}
 		switch {
 		case v == "address":
 			{
-				fmt.Println("in address case")
-				value := common.HexToAddress(methodArgs[i])
-				bytes, _ := arguments.Pack(
-					value,
-				)
-				fmt.Println(bytes)
-				data = append(data, bytes...)
+				argData = common.HexToAddress(methodArgs[i])
 			}
 		case strings.HasPrefix(v, "uint") || strings.HasPrefix(v, "int"):
 			{
-				fmt.Println("in int case")
 				value := new(big.Int)
 				value.SetString(methodArgs[i], 10)
-				bytes, _ := arguments.Pack(
-					value,
-				)
-				fmt.Println(bytes)
-				data = append(data, bytes...)
+				argData = value
 			}
 		case strings.HasPrefix(v, "bytes"):
 			{
-				fmt.Println("in bytes case")
 				value := [32]byte{}
 				copy(value[:], []byte(methodArgs[i]))
-				bytes, _ := arguments.Pack(
-					value,
-				)
-				fmt.Println(bytes)
-				data = append(data, bytes...)
+				argData = value
+			}
+		case strings.HasPrefix(v, "string"):
+			{
+				argData = methodArgs[i]
 			}
 		case strings.HasPrefix(v, "bool"):
 			{
@@ -351,16 +343,14 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 				if err != nil {
 					log.Fatal(err)
 				}
-				bytes, _ := arguments.Pack(
-					value,
-				)
-				fmt.Println("in bool", bytes)
-				data = append(data, bytes...)
+				argData = value
 			}
 
 		}
-
+		argumentsData = append(argumentsData, argData)
 	}
+	abiEncodeData, _ := arguments.PackValues(argumentsData)
+	data = append(data, abiEncodeData...)
 	fmt.Println("final data:", data)
 
 	return data, nil

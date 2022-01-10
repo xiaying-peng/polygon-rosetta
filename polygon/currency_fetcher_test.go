@@ -43,6 +43,10 @@ const (
 	invalidContractAddressTooShort      = "0xdeadbeef"
 	invalidContractAddressMissingPrefix = "deadbeef"
 
+	invalidWETHContractAddress = "0x00dD3599Ae4813F3528C0d532851B937Cee1B489"
+	invalidWETHSymbol 			= "WETH"
+	invalidWETHDecimals			= 0 // currently showing up as negative
+
 	unknownContractAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 )
 
@@ -75,6 +79,14 @@ var unknownCurrency = &RosettaTypes.Currency{
 	Decimals: int32(defaultERC20Decimals),
 	Metadata: map[string]interface{}{
 		ContractAddressKey: unknownContractAddress,
+	},
+}
+
+var invalidWETHCurrency = &RosettaTypes.Currency{
+	Symbol:   invalidWETHSymbol,
+	Decimals: int32(invalidWETHDecimals),
+	Metadata: map[string]interface{}{
+		ContractAddressKey: invalidWETHContractAddress,
 	},
 }
 
@@ -154,6 +166,17 @@ func TestFetchCurrency(t *testing.T) {
 			expectedCurrency: emptySymbolCurrency,
 			decimals:         emptySymbolDecimals,
 			symbol:           defaultERC20Symbol,
+			mockFn: func(mockGraphQL *mocks.GraphQL, contractAddress string) {
+				mockFetchDecimals(t, mockGraphQL, contractAddress)
+				mockFetchSymbol(t, mockGraphQL, contractAddress)
+			},
+			error: nil,
+		},
+		"happy path: invalid token decimals parsed as 0": {
+			contractAddress:  invalidWETHContractAddress,
+			expectedCurrency: invalidWETHCurrency,
+			decimals:         invalidWETHDecimals,
+			symbol:           invalidWETHSymbol,
 			mockFn: func(mockGraphQL *mocks.GraphQL, contractAddress string) {
 				mockFetchDecimals(t, mockGraphQL, contractAddress)
 				mockFetchSymbol(t, mockGraphQL, contractAddress)

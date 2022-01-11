@@ -137,7 +137,7 @@ func (ecf ERC20CurrencyFetcher) fetchCurrency(
 		decimalsBigInt, err = parseIntReturn(artifacts.ERC20ABI, "decimals", decodedDecimals)
 		int64 := decimalsBigInt.Int64()
 
-		if int64 >= 0xFFFFFFFF {
+		if int64 >= 0x7FFFFFFF {
 			// if it cannot be casted into int32 (due to overflow), default to 0
 			decimalsBigInt = big.NewInt(0)
 		}

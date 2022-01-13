@@ -365,25 +365,20 @@ func (ec *Client) getBlock(
 	loadedTxs := make([]*loadedTransaction, len(body.Transactions))
 	for i, tx := range body.Transactions {
 		txs[i] = tx.tx
-		var gasPrice *big.Int
-		if txs[i].Type() == eip1559TxType {
-			// Handle EIP-1559 fee computation
-			tip, err := txs[i].EffectiveGasTip(head.BaseFee)
-			if err != nil {
-				return nil, nil, fmt.Errorf("%w: failure getting effective gas tip", err)
-			}
-			gasPrice = new(big.Int).Add(tip, head.BaseFee)
-		} else {
-			gasPrice = txs[i].GasPrice()
-		}
 		receipt := receipts[i]
-		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-		feeAmount := gasUsedBig.Mul(gasUsedBig, gasPrice)
-
+		gasUsed := new(big.Int).SetUint64(receipt.GasUsed)
+		gasPrice, err := effectiveGasPrice(txs[i], head.BaseFee)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%w: failure getting gas price", err)
+		}
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
-		loadedTxs[i].FeeAmount = feeAmount
-		loadedTxs[i].Miner = MustChecksum(head.Coinbase.Hex())
+		loadedTxs[i].FeeAmount = new(big.Int).Mul(gasUsed, gasPrice)
+		if head.BaseFee != nil { // EIP-1559
+			loadedTxs[i].FeeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
+		} else {
+			loadedTxs[i].FeeBurned = nil
+		}
 		loadedTxs[i].Author = MustChecksum(blockAuthor.Address)
 		loadedTxs[i].Receipt = receipt
 
@@ -403,6 +398,21 @@ func (ec *Client) getBlock(
 
 	uncles := []*types.Header{} // no uncles in polygon
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
+}
+
+// effectiveGasPrice returns the price of gas charged to this transaction to be included in the
+// block.
+func effectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, error) {
+	if tx.Type() != eip1559TxType {
+		return tx.GasPrice(), nil
+	}
+	// For EIP-1559 the gas price is determined by the base fee & miner tip instead
+	// of the tx-specified gas price.
+	tip, err := tx.EffectiveGasTip(baseFee)
+	if err != nil {
+		return nil, err
+	}
+	return new(big.Int).Add(tip, baseFee), nil
 }
 
 func getStateSyncTraces(receipt *types.Receipt) (*Call, json.RawMessage) {
@@ -951,7 +961,7 @@ type loadedTransaction struct {
 	BlockNumber *string
 	BlockHash   *common.Hash
 	FeeAmount   *big.Int
-	Miner       string
+	FeeBurned   *big.Int // nil if no fees were burned
 	Author      string
 	Status      bool
 
@@ -961,11 +971,11 @@ type loadedTransaction struct {
 }
 
 func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*RosettaTypes.Operation {
-	minerEarnedAmount := new(big.Int).Set(tx.FeeAmount)
-	baseFee := block.BaseFee()
-	if baseFee != nil {
-		// baseFee is burned and hence should not be paid to the miner.
-		minerEarnedAmount.Sub(tx.FeeAmount, baseFee)
+	var minerEarnedAmount *big.Int
+	if tx.FeeBurned == nil {
+		minerEarnedAmount = tx.FeeAmount
+	} else {
+		minerEarnedAmount = new(big.Int).Sub(tx.FeeAmount, tx.FeeBurned)
 	}
 	rOps := []*RosettaTypes.Operation{
 		{
@@ -1002,46 +1012,47 @@ func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*Rosett
 			},
 		},
 	}
-	if baseFee != nil {
-		// Burn the base fee for EIP-1559 transactions by sending it to the burn contract address
-		burntContract := ec.CalculateBurntContract(block.NumberU64())
-		debitOp := &RosettaTypes.Operation{
-			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+
+	if tx.FeeBurned == nil {
+		return rOps
+	}
+
+	// Burnt fees, if any, need to go to the burn contract.
+	burntContract := ec.CalculateBurntContract(block.NumberU64())
+	debitOp := &RosettaTypes.Operation{
+		OperationIdentifier: &RosettaTypes.OperationIdentifier{
+			Index: 2,
+		},
+		Type:   FeeOpType,
+		Status: RosettaTypes.String(SuccessStatus),
+		Account: &RosettaTypes.AccountIdentifier{
+			Address: MustChecksum(tx.From.String()),
+		},
+		Amount: &RosettaTypes.Amount{
+			Value:    new(big.Int).Neg(tx.FeeBurned).String(),
+			Currency: Currency,
+		},
+	}
+	creditOp := &RosettaTypes.Operation{
+		OperationIdentifier: &RosettaTypes.OperationIdentifier{
+			Index: 3,
+		},
+		RelatedOperations: []*RosettaTypes.OperationIdentifier{
+			{
 				Index: 2,
 			},
-			Type:   FeeOpType,
-			Status: RosettaTypes.String(SuccessStatus),
-			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(tx.From.String()),
-			},
-			Amount: &RosettaTypes.Amount{
-				Value:    new(big.Int).Neg(baseFee).String(),
-				Currency: Currency,
-			},
-		}
-		rOps = append(rOps, debitOp)
-		creditOp := &RosettaTypes.Operation{
-			OperationIdentifier: &RosettaTypes.OperationIdentifier{
-				Index: 3,
-			},
-			RelatedOperations: []*RosettaTypes.OperationIdentifier{
-				{
-					Index: 2,
-				},
-			},
-			Type:   FeeOpType,
-			Status: RosettaTypes.String(SuccessStatus),
-			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(burntContract),
-			},
-			Amount: &RosettaTypes.Amount{
-				Value:    baseFee.String(),
-				Currency: Currency,
-			},
-		}
-		rOps = append(rOps, creditOp)
+		},
+		Type:   FeeOpType,
+		Status: RosettaTypes.String(SuccessStatus),
+		Account: &RosettaTypes.AccountIdentifier{
+			Address: MustChecksum(burntContract),
+		},
+		Amount: &RosettaTypes.Amount{
+			Value:    tx.FeeBurned.String(),
+			Currency: Currency,
+		},
 	}
-	return rOps
+	return append(rOps, debitOp, creditOp)
 }
 
 // transactionReceipt returns the receipt of a transaction by transaction hash.

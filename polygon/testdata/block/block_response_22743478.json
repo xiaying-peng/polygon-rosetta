@@ -25,7 +25,7 @@
               "address": "0xEF4e5750a803741c0B9Ed8b6aF356192a1769b85"
             },
             "amount": {
-              "value": "-731849999999993",
+              "value": "-731849999795082",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -47,7 +47,7 @@
               "address": "0xbe188D6641E8b680743A4815dFA0f6208038960F"
             },
             "amount": {
-              "value": "731849999999993",
+              "value": "731849999795082",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -64,7 +64,7 @@
               "address": "0xEF4e5750a803741c0B9Ed8b6aF356192a1769b85"
             },
             "amount": {
-              "value": "-7",
+              "value": "-204918",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -86,7 +86,7 @@
               "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
             },
             "amount": {
-              "value": "7",
+              "value": "204918",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -154,7 +154,7 @@
               "address": "0x7b8821555e2763726e4F16a3c21D68B4683F1CDF"
             },
             "amount": {
-              "value": "-4350849999999993",
+              "value": "-4350849998781762",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -176,7 +176,7 @@
               "address": "0xbe188D6641E8b680743A4815dFA0f6208038960F"
             },
             "amount": {
-              "value": "4350849999999993",
+              "value": "4350849998781762",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -193,7 +193,7 @@
               "address": "0x7b8821555e2763726e4F16a3c21D68B4683F1CDF"
             },
             "amount": {
-              "value": "-7",
+              "value": "-1218238",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -215,7 +215,7 @@
               "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
             },
             "amount": {
-              "value": "7",
+              "value": "1218238",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -284,7 +284,7 @@
               "address": "0x7B921b95Fd68E629e03CADaEefc6B842217e3593"
             },
             "amount": {
-              "value": "-53040000148505",
+              "value": "-53040000000000",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -306,7 +306,7 @@
               "address": "0xbe188D6641E8b680743A4815dFA0f6208038960F"
             },
             "amount": {
-              "value": "53040000148505",
+              "value": "53040000000000",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -323,7 +323,7 @@
               "address": "0x7B921b95Fd68E629e03CADaEefc6B842217e3593"
             },
             "amount": {
-              "value": "-7",
+              "value": "-148512",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -345,7 +345,7 @@
               "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
             },
             "amount": {
-              "value": "7",
+              "value": "148512",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -431,7 +431,7 @@
               "address": "0x64165472c57771287B957B5399d91AD707c70D72"
             },
             "amount": {
-              "value": "-288387500807478",
+              "value": "-288387500000000",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -453,7 +453,7 @@
               "address": "0xbe188D6641E8b680743A4815dFA0f6208038960F"
             },
             "amount": {
-              "value": "288387500807478",
+              "value": "288387500000000",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -470,7 +470,7 @@
               "address": "0x64165472c57771287B957B5399d91AD707c70D72"
             },
             "amount": {
-              "value": "-7",
+              "value": "-807485",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18
@@ -492,7 +492,7 @@
               "address": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
             },
             "amount": {
-              "value": "7",
+              "value": "807485",
               "currency": {
                 "symbol": "MATIC",
                 "decimals": 18

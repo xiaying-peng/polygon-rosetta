@@ -23,19 +23,20 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
+	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/maticnetwork/polygon-rosetta/configuration"
 	mocks "github.com/maticnetwork/polygon-rosetta/mocks/services"
 	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"github.com/maticnetwork/polygon-rosetta/services/errors"
-	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	metadataFrom = fromAddress
-	metadataTo   = toAddress
-	metadataData = transferData
+	metadataFrom        = fromAddress
+	metadataTo          = toAddress
+	metadataData        = transferData
+	metadataGenericData = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
 )
 
 func TestMetadata_Offline(t *testing.T) {
@@ -151,6 +152,50 @@ func TestMetadata(t *testing.T) {
 					"gas_price": transferGasPriceHex,
 					"gas_limit": transferGasLimitERC20Hex,
 					"data":      metadataData,
+				},
+				SuggestedFee: []*types.Amount{
+					{
+						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimitERC20),
+						Currency: polygon.Currency,
+					},
+				},
+			},
+		},
+		"happy path: Generic contract call metadata": {
+			options: map[string]interface{}{
+				"from":             metadataFrom,
+				"to":               metadataTo,
+				"value":            "0x0",
+				"nonce":            transferNonceHex2,
+				"contract_address": tokenContractAddress,
+				"data":             metadataGenericData,
+				"method_signature": "approve(address,uint256)",
+				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+			},
+			mocks: func(ctx context.Context, client *mocks.Client) {
+				var gasPrice *big.Int = nil
+
+				to := common.HexToAddress(tokenContractAddress)
+				dataBytes, _ := hexutil.Decode(metadataGenericData)
+				client.On("EstimateGas", ctx, ethereum.CallMsg{
+					From: common.HexToAddress(metadataFrom),
+					To:   &to,
+					Data: dataBytes,
+				}).Return(transferGasLimitERC20, nil)
+
+				client.On("SuggestGasPrice", ctx, gasPrice).
+					Return(big.NewInt(int64(transferGasPrice)), nil)
+			},
+			expectedResponse: &types.ConstructionMetadataResponse{
+				Metadata: map[string]interface{}{
+					"to":               tokenContractAddress,
+					"value":            "0x0",
+					"nonce":            transferNonceHex2,
+					"gas_price":        transferGasPriceHex,
+					"gas_limit":        transferGasLimitERC20Hex,
+					"data":             metadataGenericData,
+					"method_signature": "approve(address,uint256)",
+					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{

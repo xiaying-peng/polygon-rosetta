@@ -1110,25 +1110,14 @@ func (ec *Client) populateTransactions(
 	block *EthTypes.Block,
 	loadedTransactions []*loadedTransaction,
 ) ([]*RosettaTypes.Transaction, error) {
-	transactions := make(
-		[]*RosettaTypes.Transaction,
-		len(block.Transactions())+1, // include reward tx
-	)
-
-	// Compute reward transaction (block + uncle reward)
-	// Always goes to nil address in polygon (and zero value)
-	transactions[0] = ec.blockRewardTransaction(
-		blockIdentifier,
-		block.Coinbase().String(),
-	)
-
+	transactions := make([]*RosettaTypes.Transaction, len(block.Transactions()))
 	for i, tx := range loadedTransactions {
 		transaction, err := ec.populateTransaction(ctx, tx, block)
 		if err != nil {
 			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
 		}
 
-		transactions[i+1] = transaction
+		transactions[i] = transaction
 	}
 
 	return transactions, nil
@@ -1190,47 +1179,6 @@ func (ec *Client) populateTransaction(
 	}
 
 	return populatedTransaction, nil
-}
-
-// Polygon has no mining reward
-func (ec *Client) miningReward(
-	*big.Int,
-) int64 {
-	return big.NewInt(0).Int64()
-}
-
-func (ec *Client) blockRewardTransaction(
-	blockIdentifier *RosettaTypes.BlockIdentifier,
-	miner string,
-) *RosettaTypes.Transaction {
-	var ops []*RosettaTypes.Operation
-	miningReward := ec.miningReward(big.NewInt(blockIdentifier.Index))
-
-	// Calculate miner rewards
-	minerReward := miningReward
-
-	miningRewardOp := &RosettaTypes.Operation{
-		OperationIdentifier: &RosettaTypes.OperationIdentifier{
-			Index: 0,
-		},
-		Type:   MinerRewardOpType,
-		Status: RosettaTypes.String(SuccessStatus),
-		Account: &RosettaTypes.AccountIdentifier{
-			Address: MustChecksum(miner),
-		},
-		Amount: &RosettaTypes.Amount{
-			Value:    strconv.FormatInt(minerReward, 10),
-			Currency: Currency,
-		},
-	}
-	ops = append(ops, miningRewardOp)
-
-	return &RosettaTypes.Transaction{
-		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{
-			Hash: blockIdentifier.Hash,
-		},
-		Operations: ops,
-	}
 }
 
 func (ec *Client) blockAuthor(ctx context.Context, blockIndex int64) (*RosettaTypes.AccountIdentifier, error) {

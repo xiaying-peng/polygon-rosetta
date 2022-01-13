@@ -12,30 +12,6 @@
     "transactions": [
       {
         "transaction_identifier": {
-          "hash": "0x80714362cc0b6ce164de611c6383c63c3783a9e0f6445e7c6e87b92159ec09ce"
-        },
-        "operations": [
-          {
-            "operation_identifier": {
-              "index": 0
-            },
-            "type": "MINER_REWARD",
-            "status": "SUCCESS",
-            "account": {
-              "address": "0x0000000000000000000000000000000000000000"
-            },
-            "amount": {
-              "value": "0",
-              "currency": {
-                "symbol": "MATIC",
-                "decimals": 18
-              }
-            }
-          }
-        ]
-      },
-      {
-        "transaction_identifier": {
           "hash": "0x99c0da17e68d1ed46f0b65ed177c7497bf1a8e151c22daf37f93c83ea3c73e6c"
         },
         "operations": [

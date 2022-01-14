@@ -142,7 +142,7 @@ func LoadConfiguration() (*Configuration, error) {
 		config.Params = params.MainnetChainConfig
 		config.Params.ChainID.SetString(MainnetChainID, 10)
 		config.BurntContract = map[string]string{
-			"0": "0x0000000000000000000000000000000000000000",
+			"23850000": "0x70bca57f4579f58670ab2d18ef16e02c17553c38",
 		} // TODO add burn contract and block when mainnet forks to support EIP-1559
 	case Testnet, Mumbai:
 		config.Network = &types.NetworkIdentifier{

@@ -80,7 +80,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateGenericContractCallUnsigned(),
-				"0x55bf0447d109c960db3290be9bf3893f7b2476fd71c23e85550dd55b4602ea23",
+				"0x6db5acd2132d1eaa7cf47392b98ecee1befe2a760f2e68d7ef7e9df40f63a384",
 			),
 		},
 		"error: bad request: native currency mismatch destination address": {

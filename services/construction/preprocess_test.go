@@ -272,18 +272,6 @@ func TestPreprocess(t *testing.T) {
 			expectedError: templateError(
 				svcErrors.ErrInvalidTokenContractAddress, "token contract address is not a valid address"),
 		},
-		"error: contract address invalid": {
-			operations: templateOperations(preprocessTransferValue, polygon.Currency),
-			metadata: map[string]interface{}{
-				"nonce":            "34",
-				"method_signature": "approve(address,uint256)",
-				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
-				"contract_address": "invalid_contract_address",
-			},
-			expectedResponse: nil,
-			expectedError: templateError(
-				svcErrors.ErrInvalidAddress, "contract address is not a valid address"),
-		},
 	}
 
 	for name, test := range tests {

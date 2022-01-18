@@ -137,18 +137,6 @@ func (a *APIService) ConstructionPreprocess(
 				fmt.Errorf("%s is not a valid signature string", v),
 			)
 		}
-		contractAddress, ok := request.Metadata["contract_address"].(string)
-		if !ok {
-			return nil, svcErrors.WrapErr(
-				svcErrors.ErrInvalidAddress,
-				fmt.Errorf("%s is not a valid string", contractAddress),
-			)
-		}
-		checkContractAddress, ok := polygon.ChecksumAddress(contractAddress)
-		if !ok {
-			err := errors.New("contract address is not a valid address")
-			return nil, svcErrors.WrapErr(svcErrors.ErrInvalidAddress, err)
-		}
 		var methodArgs []string
 		if v, ok := request.Metadata["method_args"]; ok {
 			methodArgsBytes, _ := json.Marshal(v)
@@ -161,7 +149,7 @@ func (a *APIService) ConstructionPreprocess(
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrFetchFunctionSignatureMethodID, err)
 		}
-		preprocessOutputOptions.ContractAddress = checkContractAddress
+		preprocessOutputOptions.ContractAddress = checkTo
 		preprocessOutputOptions.Data = data
 		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 in any contract call
 		preprocessOutputOptions.MethodSignature = methodSigStringObj

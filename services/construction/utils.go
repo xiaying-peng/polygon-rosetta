@@ -20,9 +20,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/maticnetwork/polygon-rosetta/polygon"
 
 	"golang.org/x/crypto/sha3"
 )

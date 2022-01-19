@@ -22,13 +22,13 @@ import (
 
 	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 
-	"github.com/maticnetwork/polygon-rosetta/configuration"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/maticnetwork/polygon-rosetta/configuration"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/maticnetwork/polygon-rosetta/polygon"
 )
 
 var (

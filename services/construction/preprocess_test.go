@@ -20,9 +20,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
+	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/maticnetwork/polygon-rosetta/polygon"
 	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
-	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"
 )
 

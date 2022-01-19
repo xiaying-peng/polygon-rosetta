@@ -23,12 +23,12 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
+	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/maticnetwork/polygon-rosetta/configuration"
 	mocks "github.com/maticnetwork/polygon-rosetta/mocks/services"
 	"github.com/maticnetwork/polygon-rosetta/polygon"
 	"github.com/maticnetwork/polygon-rosetta/services/errors"
-	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 

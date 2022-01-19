@@ -45,13 +45,13 @@ const (
 
 	// mumbai currency
 	invalidWETHContractAddress = "0x00dD3599Ae4813F3528C0d532851B937Cee1B489"
-	invalidWETHSymbol 			= "WETH"
-	invalidWETHDecimals			= 0 // raw payload overflow
+	invalidWETHSymbol          = "WETH"
+	invalidWETHDecimals        = 0 // raw payload overflow
 
 	// mainnet currency
 	invalidXSDOContractAddress = "0x9A28226CF889Af5B7339CD3117978F5216b72d05"
-	invalidXSDOSymbol = "XSDO"
-	invalidXSDODecimals = 0 // raw payload returns 18000000000000000000, resulting in overflow
+	invalidXSDOSymbol          = "XSDO"
+	invalidXSDODecimals        = 0 // raw payload returns 18000000000000000000, resulting in overflow
 
 	unknownContractAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 )

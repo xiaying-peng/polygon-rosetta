@@ -135,9 +135,8 @@ func (ecf ERC20CurrencyFetcher) fetchCurrency(
 	// If the decodedDecimals byte slice has a non-zero length, parse it as an Int. Otherwise, let decimals default to 0.
 	if len(decodedDecimals) > 0 {
 		decimalsBigInt, err = parseIntReturn(artifacts.ERC20ABI, "decimals", decodedDecimals)
-		int64 := decimalsBigInt.Int64()
 
-		if int64 >= 0x7FFFFFFF {
+		if decimalsBigInt.Cmp(big.NewInt(0x7FFFFFFF)) == 1 {
 			// if it cannot be casted into int32 (due to overflow), default to 0
 			decimalsBigInt = big.NewInt(0)
 		}

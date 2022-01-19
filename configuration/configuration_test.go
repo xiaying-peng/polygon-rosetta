@@ -69,7 +69,7 @@ func TestLoadConfiguration(t *testing.T) {
 				SkipGethAdmin:          false,
 				GethHeaders:            nil,
 				BurntContract: map[string]string{
-					"0": "0x0000000000000000000000000000000000000000",
+					"23850000": "0x70bca57f4579f58670ab2d18ef16e02c17553c38",
 				},
 			},
 		},
@@ -97,7 +97,7 @@ func TestLoadConfiguration(t *testing.T) {
 					{Key: "X-Api-Version", Value: "2"},
 				},
 				BurntContract: map[string]string{
-					"0": "0x0000000000000000000000000000000000000000",
+					"23850000": "0x70bca57f4579f58670ab2d18ef16e02c17553c38",
 				},
 			},
 		},

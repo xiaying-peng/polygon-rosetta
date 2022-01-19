@@ -19,8 +19,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/types"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/stretchr/testify/assert"
 )
 

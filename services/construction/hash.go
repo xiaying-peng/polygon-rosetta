@@ -18,9 +18,9 @@ import (
 	"context"
 	"errors"
 
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
 // ConstructionHash implements the /construction/hash endpoint.

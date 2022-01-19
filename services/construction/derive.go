@@ -18,9 +18,9 @@ import (
 	"context"
 	"errors"
 
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
 // ConstructionDerive implements the /construction/derive endpoint.

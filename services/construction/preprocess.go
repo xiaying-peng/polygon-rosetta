@@ -21,11 +21,11 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/coinbase/rosetta-sdk-go/parser"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/maticnetwork/polygon-rosetta/polygon"
+	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
 // ConstructionPreprocess implements the /construction/preprocess

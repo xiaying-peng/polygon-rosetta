@@ -158,7 +158,6 @@ func (a *APIService) ConstructionPreprocess(
 	}
 
 	marshaled, err := marshalJSONMap(preprocessOutputOptions)
-	fmt.Println(marshaled)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 	}
@@ -296,7 +295,6 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 		return data, nil
 	}
 	splitSigByComma := strings.Split(splitSigByTrailingParenthesis[0], ",")
-	fmt.Println(splitSigByComma)
 
 	for i, v := range splitSigByComma {
 		typed, _ := abi.NewType(v, v, nil)
@@ -331,7 +329,6 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 			}
 		case strings.HasPrefix(v, "bool"):
 			{
-				fmt.Println("in bool case")
 				value, err := strconv.ParseBool(methodArgs[i])
 				if err != nil {
 					log.Fatal(err)
@@ -344,7 +341,5 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 	}
 	abiEncodeData, _ := arguments.PackValues(argumentsData)
 	data = append(data, abiEncodeData...)
-	fmt.Println("final data:", data)
-
 	return data, nil
 }

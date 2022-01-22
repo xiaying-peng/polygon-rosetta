@@ -117,14 +117,13 @@ func TestPreprocess(t *testing.T) {
 				"nonce":            "34",
 				"method_signature": "approve(address,uint256)",
 				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
-				"contract_address": preprocessTokenContractAddress,
 			},
 			expectedResponse: &types.ConstructionPreprocessResponse{
 				Options: map[string]interface{}{
 					"from":             preprocessFromAddress,
 					"to":               preprocessToAddress, // it will be contract address user need to pass in operation
 					"value":            "0x0",
-					"contract_address": preprocessTokenContractAddress,
+					"contract_address": preprocessToAddress,
 					"data":             preprocessGenericData,
 					"nonce":            "0x22",
 					"method_signature": "approve(address,uint256)",

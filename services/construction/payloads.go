@@ -33,15 +33,20 @@ func (a *APIService) ConstructionPayloads(
 	ctx context.Context,
 	request *types.ConstructionPayloadsRequest,
 ) (*types.ConstructionPayloadsResponse, *types.Error) {
-	fromOp, toOp, err := matchTransferOperations(request.Operations)
-	if err != nil {
-		return nil, svcErrors.WrapErr(svcErrors.ErrUnclearIntent, err)
-	}
 
 	// Convert map to Metadata struct
 	var metadata metadata
 	if err := unmarshalJSONMap(request.Metadata, &metadata); err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
+	}
+	var isContractCall bool = false
+	if hasData(metadata.Data) && !hasTransferData(metadata.Data) {
+		isContractCall = true
+	}
+
+	fromOp, toOp, err := matchTransferOperations(request.Operations, isContractCall)
+	if err != nil {
+		return nil, svcErrors.WrapErr(svcErrors.ErrUnclearIntent, err)
 	}
 
 	if err := validateRequest(fromOp, toOp, metadata); err != nil {

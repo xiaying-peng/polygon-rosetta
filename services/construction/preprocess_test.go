@@ -30,13 +30,13 @@ var (
 	preprocessFromAddress          = fromAddress
 	preprocessToAddress            = toAddress
 	preprocessTokenContractAddress = tokenContractAddress
-
-	preprocessTransferValue    = uint64(1)
-	preprocessTransferValueHex = hexutil.EncodeUint64(preprocessTransferValue)
-	preprocessData             = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
-	preprocessGasPrice         = uint64(100000000000)
-	preprocessGasPriceHex      = hexutil.EncodeUint64(preprocessGasPrice)
-	preprocessGenericData      = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
+	preprocessZeroTransferValue    = uint64(0)
+	preprocessTransferValue        = uint64(1)
+	preprocessTransferValueHex     = hexutil.EncodeUint64(preprocessTransferValue)
+	preprocessData                 = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
+	preprocessGasPrice             = uint64(100000000000)
+	preprocessGasPriceHex          = hexutil.EncodeUint64(preprocessGasPrice)
+	preprocessGenericData          = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
 )
 
 func TestPreprocess(t *testing.T) {
@@ -113,6 +113,26 @@ func TestPreprocess(t *testing.T) {
 		},
 		"happy path: Generic Contract call": {
 			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"nonce":            "34",
+				"method_signature": "approve(address,uint256)",
+				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":             preprocessFromAddress,
+					"to":               preprocessToAddress, // it will be contract address user need to pass in operation
+					"value":            "0x0",
+					"contract_address": preprocessToAddress,
+					"data":             preprocessGenericData,
+					"nonce":            "0x22",
+					"method_signature": "approve(address,uint256)",
+					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+				},
+			},
+		},
+		"happy path: Generic Contract call with zero transfer value": {
+			operations: templateOperations(preprocessZeroTransferValue, polygon.Currency),
 			metadata: map[string]interface{}{
 				"nonce":            "34",
 				"method_signature": "approve(address,uint256)",

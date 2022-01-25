@@ -39,11 +39,14 @@ func (a *APIService) ConstructionPreprocess(
 	ctx context.Context,
 	request *types.ConstructionPreprocessRequest,
 ) (*types.ConstructionPreprocessResponse, *types.Error) {
-	fromOp, toOp, err := matchTransferOperations(request.Operations)
+	var isContractCall bool = false
+	if _, ok := request.Metadata["method_signature"]; ok {
+		isContractCall = true
+	}
+	fromOp, toOp, err := matchTransferOperations(request.Operations, isContractCall)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnclearIntent, err)
 	}
-
 	fromAdd := fromOp.Account.Address
 	toAdd := toOp.Account.Address
 
@@ -169,11 +172,74 @@ func (a *APIService) ConstructionPreprocess(
 
 // matchTransferOperations attempts to match a slice of operations with a `transfer`
 // intent. This will match both Native token (Matic) and ERC20 tokens
-func matchTransferOperations(operations []*types.Operation) (
+func matchTransferOperations(operations []*types.Operation, isContractCall bool) (
 	*types.Operation,
 	*types.Operation,
 	error,
 ) {
+	valueOne, err := strconv.ParseInt(operations[0].Amount.Value, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("in 0 value")
+	valueTwo, err := strconv.ParseInt(operations[1].Amount.Value, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if isContractCall && valueOne == 0 {
+		fmt.Println("value one...!!!", valueOne)
+		fmt.Println("value two..!!!", valueTwo)
+		if valueOne != valueTwo {
+			return nil, nil, errors.New("for generic call both values should be zero")
+		}
+		descriptions := &parser.Descriptions{
+			OperationDescriptions: []*parser.OperationDescription{
+				{
+					Type: polygon.CallOpType,
+					Account: &parser.AccountDescription{
+						Exists: true,
+					},
+					Amount: &parser.AmountDescription{
+						Exists: true,
+						Sign:   parser.AnyAmountSign,
+					},
+				},
+				{
+					Type: polygon.CallOpType,
+					Account: &parser.AccountDescription{
+						Exists: true,
+					},
+					Amount: &parser.AmountDescription{
+						Exists: true,
+						Sign:   parser.AnyAmountSign,
+					},
+				},
+			},
+			ErrUnmatched: true,
+		}
+
+		matches, err := parser.MatchOperations(descriptions, operations)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		fmt.Println("matches..!!", matches[0])
+
+		fromOp, _ := matches[0].First()
+		toOp, _ := matches[1].First()
+
+		// Manually validate currencies since we cannot rely on parser
+		if fromOp.Amount.Currency == nil || toOp.Amount.Currency == nil {
+			return nil, nil, errors.New("missing currency")
+		}
+
+		if !reflect.DeepEqual(fromOp.Amount.Currency, toOp.Amount.Currency) {
+			return nil, nil, errors.New("from and to currencies are not equal")
+		}
+
+		return fromOp, toOp, nil
+
+	}
 	descriptions := &parser.Descriptions{
 		OperationDescriptions: []*parser.OperationDescription{
 			{

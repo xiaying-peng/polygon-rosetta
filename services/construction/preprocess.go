@@ -154,7 +154,6 @@ func (a *APIService) ConstructionPreprocess(
 		}
 		preprocessOutputOptions.ContractAddress = checkTo
 		preprocessOutputOptions.Data = data
-		preprocessOutputOptions.Value = big.NewInt(0) // MATIC value is 0 in any contract call
 		preprocessOutputOptions.MethodSignature = methodSigStringObj
 		preprocessOutputOptions.MethodArgs = methodArgs
 
@@ -181,7 +180,6 @@ func matchTransferOperations(operations []*types.Operation, isContractCall bool)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("in 0 value")
 	valueTwo, err := strconv.ParseInt(operations[1].Amount.Value, 10, 64)
 	if err != nil {
 		log.Fatal(err)
@@ -222,8 +220,6 @@ func matchTransferOperations(operations []*types.Operation, isContractCall bool)
 		if err != nil {
 			return nil, nil, err
 		}
-
-		fmt.Println("matches..!!", matches[0])
 
 		fromOp, _ := matches[0].First()
 		toOp, _ := matches[1].First()

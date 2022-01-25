@@ -122,7 +122,7 @@ func TestPreprocess(t *testing.T) {
 				Options: map[string]interface{}{
 					"from":             preprocessFromAddress,
 					"to":               preprocessToAddress, // it will be contract address user need to pass in operation
-					"value":            "0x0",
+					"value":            "0x1",
 					"contract_address": preprocessToAddress,
 					"data":             preprocessGenericData,
 					"nonce":            "0x22",

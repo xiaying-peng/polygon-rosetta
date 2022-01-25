@@ -185,8 +185,6 @@ func matchTransferOperations(operations []*types.Operation, isContractCall bool)
 		log.Fatal(err)
 	}
 	if isContractCall && valueOne == 0 {
-		fmt.Println("value one...!!!", valueOne)
-		fmt.Println("value two..!!!", valueTwo)
 		if valueOne != valueTwo {
 			return nil, nil, errors.New("for generic call both values should be zero")
 		}

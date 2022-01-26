@@ -67,12 +67,11 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
-	var checkTokenContractAddress string
 	gasLimit := polygon.TransferGasLimit
 	to := checkTo
 	// Only work for ERC20 transfer
 	if len(input.TokenAddress) > 0 {
-		checkTokenContractAddress, ok = polygon.ChecksumAddress(input.TokenAddress)
+		checkTokenContractAddress, ok := polygon.ChecksumAddress(input.TokenAddress)
 		if !ok {
 			return nil, svcErrors.WrapErr(
 				svcErrors.ErrInvalidAddress,
@@ -89,6 +88,25 @@ func (a *APIService) ConstructionMetadata(
 		}
 	}
 
+	// Only work for Generic Contract calls
+	if len(input.ContractAddress) > 0 {
+		checkContractAddress, ok := polygon.ChecksumAddress(input.ContractAddress)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidAddress,
+				fmt.Errorf("%s is not a valid address", input.ContractAddress),
+			)
+		}
+		// Override the destination address to be the contract address
+		to = checkContractAddress
+
+		var err *types.Error
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// TODO: Upgrade to use EIP1559
 	gasPrice, err := a.client.SuggestGasPrice(ctx, input.GasPrice)
 	if err != nil {
@@ -96,12 +114,14 @@ func (a *APIService) ConstructionMetadata(
 	}
 
 	metadata := &metadata{
-		Nonce:    nonce,
-		GasPrice: gasPrice,
-		GasLimit: big.NewInt(int64(gasLimit)),
-		Data:     input.Data,
-		Value:    input.Value,
-		To:       to,
+		Nonce:           nonce,
+		GasPrice:        gasPrice,
+		GasLimit:        big.NewInt(int64(gasLimit)),
+		Data:            input.Data,
+		Value:           input.Value,
+		To:              to,
+		MethodSignature: input.MethodSignature,
+		MethodArgs:      input.MethodArgs,
 	}
 
 	metadataMap, err := marshalJSONMap(metadata)

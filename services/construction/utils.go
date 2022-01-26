@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -133,4 +134,26 @@ func rosettaOperations(
 			},
 		},
 	}
+}
+
+// contractCallMethodID calculates the first 4 bytes of the method
+// signature for function call on contract
+func contractCallMethodID(methodSig string) ([]byte, error) {
+	fnSignature := []byte(methodSig)
+	hash := sha3.NewLegacyKeccak256()
+	if _, err := hash.Write(fnSignature); err != nil {
+		log.Fatal(err)
+	}
+
+	return hash.Sum(nil)[:4], nil
+}
+
+func hasTransferData(data []byte) bool {
+	methodID := data[:4]
+	expectedMethodID, _ := erc20TransferMethodID()
+	res := bytes.Compare(methodID, expectedMethodID)
+	if res != 0 {
+		return false
+	}
+	return true
 }

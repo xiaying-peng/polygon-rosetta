@@ -67,6 +67,22 @@ func TestPayloads(t *testing.T) {
 				"0x55bf0447d109c960db3290be9bf3893f7b2476fd71c23e85550dd55b4602ea23",
 			),
 		},
+		"happy path: Generic contract call": {
+			request: templateConstructionPayloadsRequest(
+				templateOperations(transferValue, &types.Currency{
+					Symbol:   "USDC",
+					Decimals: 18,
+					Metadata: map[string]interface{}{
+						"token_address": tokenContractAddress,
+					},
+				}),
+				templateGenericContractCallTxMetadata(),
+			),
+			expectedResponse: templateConstructionPayloadsResponse(
+				templateGenericContractCallUnsigned(),
+				"0x6db5acd2132d1eaa7cf47392b98ecee1befe2a760f2e68d7ef7e9df40f63a384",
+			),
+		},
 		"error: bad request: native currency mismatch destination address": {
 			request: templateConstructionPayloadsRequest(
 				func() []*types.Operation {
@@ -123,7 +139,7 @@ func TestPayloads(t *testing.T) {
 					return data
 				}(),
 			),
-			expectedError: templateError(svcErrors.ErrBadRequest, "invalid method id"),
+			expectedError: templateError(svcErrors.ErrBadRequest, "invalid data value"),
 		},
 	}
 
@@ -215,6 +231,33 @@ func templateERC20CurrencyUnsigned() string {
 		tokenContractAddress,
 		"0x0",
 		metadataData,
+		transferNonceHex,
+		transferGasPriceHex,
+		transferGasLimitERC20Hex,
+		chainIDHex,
+	)
+}
+
+func templateGenericContractCallTxMetadata() map[string]interface{} {
+	return map[string]interface{}{
+		"nonce":            transferNonceHex,
+		"to":               tokenContractAddress,
+		"value":            "0x0",
+		"gas_price":        transferGasPriceHex,
+		"gas_limit":        transferGasLimitERC20Hex,
+		"data":             metadataGenericData,
+		"method_signature": "approve(address,uint256)",
+		"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+	}
+}
+
+func templateGenericContractCallUnsigned() string {
+	return fmt.Sprintf(
+		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","gas_price":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
+		metadataFrom,
+		tokenContractAddress,
+		"0x0",
+		metadataGenericData,
 		transferNonceHex,
 		transferGasPriceHex,
 		transferGasLimitERC20Hex,

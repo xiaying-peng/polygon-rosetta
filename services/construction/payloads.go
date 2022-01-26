@@ -15,6 +15,7 @@
 package construction
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -32,15 +33,20 @@ func (a *APIService) ConstructionPayloads(
 	ctx context.Context,
 	request *types.ConstructionPayloadsRequest,
 ) (*types.ConstructionPayloadsResponse, *types.Error) {
-	fromOp, toOp, err := matchTransferOperations(request.Operations)
-	if err != nil {
-		return nil, svcErrors.WrapErr(svcErrors.ErrUnclearIntent, err)
-	}
 
 	// Convert map to Metadata struct
 	var metadata metadata
 	if err := unmarshalJSONMap(request.Metadata, &metadata); err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
+	}
+	isContractCall := false
+	if hasData(metadata.Data) && !hasTransferData(metadata.Data) {
+		isContractCall = true
+	}
+
+	fromOp, toOp, err := matchTransferOperations(request.Operations, isContractCall)
+	if err != nil {
+		return nil, svcErrors.WrapErr(svcErrors.ErrUnclearIntent, err)
 	}
 
 	if err := validateRequest(fromOp, toOp, metadata); err != nil {
@@ -125,7 +131,7 @@ func validateRequest(
 		if metadata.Value.String() != toOp.Amount.Value {
 			return errors.New("mismatch transfer value")
 		}
-	} else {
+	} else if hasTransferData(metadata.Data) {
 		// ERC20
 		toAdd, amount, err := erc20TransferArgs(metadata.Data)
 		if err != nil {
@@ -142,6 +148,17 @@ func validateRequest(
 		// Validate metadata value
 		if metadata.Value.String() != "0" {
 			return errors.New("invalid metadata value")
+		}
+	} else if hasData(metadata.Data) && !hasTransferData(metadata.Data) {
+
+		//contract call
+		data, err := constructContractCallData(metadata.MethodSignature, metadata.MethodArgs)
+		if err != nil {
+			return err
+		}
+		res := bytes.Compare(data, metadata.Data)
+		if res != 0 {
+			return errors.New("invalid data value")
 		}
 	}
 

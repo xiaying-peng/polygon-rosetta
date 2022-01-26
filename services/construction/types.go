@@ -98,8 +98,12 @@ type optionsWire struct {
 
 func (o *options) MarshalJSON() ([]byte, error) {
 	ow := &optionsWire{
-		From: o.From,
-		To:   o.To,
+		From:            o.From,
+		To:              o.To,
+		ContractAddress: o.ContractAddress,
+		MethodSignature: o.MethodSignature,
+		MethodArgs:      o.MethodArgs,
+		TokenAddress:    o.TokenAddress,
 	}
 
 	if o.Nonce != nil {
@@ -110,28 +114,12 @@ func (o *options) MarshalJSON() ([]byte, error) {
 		ow.Data = hexutil.Encode(o.Data)
 	}
 
-	if len(o.TokenAddress) > 0 {
-		ow.TokenAddress = o.TokenAddress
-	}
-
-	if len(o.ContractAddress) > 0 {
-		ow.ContractAddress = o.ContractAddress
-	}
-
 	if o.Value != nil {
 		ow.Value = hexutil.EncodeBig(o.Value)
 	}
 
 	if o.GasPrice != nil {
 		ow.GasPrice = hexutil.EncodeBig(o.GasPrice)
-	}
-
-	if len(o.MethodSignature) > 0 {
-		ow.MethodSignature = o.MethodSignature
-	}
-
-	if len(o.MethodArgs) > 0 {
-		ow.MethodArgs = o.MethodArgs
 	}
 
 	return json.Marshal(ow)
@@ -144,22 +132,10 @@ func (o *options) UnmarshalJSON(data []byte) error {
 	}
 	o.From = ow.From
 	o.To = ow.To
-
-	if len(ow.TokenAddress) > 0 {
-		o.TokenAddress = ow.TokenAddress
-	}
-
-	if len(ow.ContractAddress) > 0 {
-		o.ContractAddress = ow.ContractAddress
-	}
-
-	if len(ow.MethodSignature) > 0 {
-		o.MethodSignature = ow.MethodSignature
-	}
-
-	if len(ow.MethodArgs) > 0 {
-		o.MethodArgs = ow.MethodArgs
-	}
+	o.TokenAddress = ow.TokenAddress
+	o.ContractAddress = ow.ContractAddress
+	o.MethodSignature = ow.MethodSignature
+	o.MethodArgs = ow.MethodArgs
 
 	if len(ow.Nonce) > 0 {
 		nonce, err := hexutil.DecodeBig(ow.Nonce)
@@ -220,9 +196,11 @@ type metadataWire struct {
 
 func (m *metadata) MarshalJSON() ([]byte, error) {
 	mw := &metadataWire{
-		Nonce:    hexutil.Uint64(m.Nonce).String(),
-		GasPrice: hexutil.EncodeBig(m.GasPrice),
-		To:       m.To,
+		Nonce:           hexutil.Uint64(m.Nonce).String(),
+		GasPrice:        hexutil.EncodeBig(m.GasPrice),
+		To:              m.To,
+		MethodSignature: m.MethodSignature,
+		MethodArgs:      m.MethodArgs,
 	}
 
 	if m.GasLimit != nil {
@@ -235,14 +213,6 @@ func (m *metadata) MarshalJSON() ([]byte, error) {
 
 	if m.Value != nil {
 		mw.Value = hexutil.EncodeBig(m.Value)
-	}
-
-	if len(m.MethodSignature) > 0 {
-		mw.MethodSignature = m.MethodSignature
-	}
-
-	if len(m.MethodArgs) > 0 {
-		mw.MethodArgs = m.MethodArgs
 	}
 
 	return json.Marshal(mw)
@@ -267,6 +237,8 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 	m.GasPrice = gasPrice
 	m.Nonce = nonce
 	m.To = mw.To
+	m.MethodSignature = mw.MethodSignature
+	m.MethodArgs = mw.MethodArgs
 
 	if len(mw.GasLimit) > 0 {
 		gasLimit, err := hexutil.DecodeBig(mw.GasLimit)
@@ -290,14 +262,6 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Value = value
-	}
-
-	if len(mw.MethodSignature) > 0 {
-		m.MethodSignature = mw.MethodSignature
-	}
-
-	if len(mw.MethodArgs) > 0 {
-		m.MethodArgs = mw.MethodArgs
 	}
 
 	return nil

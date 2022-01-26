@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -141,7 +142,7 @@ func contractCallMethodID(methodSig string) ([]byte, error) {
 	fnSignature := []byte(methodSig)
 	hash := sha3.NewLegacyKeccak256()
 	if _, err := hash.Write(fnSignature); err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	return hash.Sum(nil)[:4], nil

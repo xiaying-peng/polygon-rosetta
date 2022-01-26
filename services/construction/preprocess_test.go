@@ -37,6 +37,9 @@ var (
 	preprocessGasPrice             = uint64(100000000000)
 	preprocessGasPriceHex          = hexutil.EncodeUint64(preprocessGasPrice)
 	preprocessGenericData          = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
+	methodSignature                = "approve(address,uint256)"
+	methodArgs                     = []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
+	expectedMethodArgs             = []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
 )
 
 func TestPreprocess(t *testing.T) {
@@ -115,8 +118,8 @@ func TestPreprocess(t *testing.T) {
 			operations: templateOperations(preprocessTransferValue, polygon.Currency),
 			metadata: map[string]interface{}{
 				"nonce":            "34",
-				"method_signature": "approve(address,uint256)",
-				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+				"method_signature": methodSignature,
+				"method_args":      methodArgs,
 			},
 			expectedResponse: &types.ConstructionPreprocessResponse{
 				Options: map[string]interface{}{
@@ -126,8 +129,8 @@ func TestPreprocess(t *testing.T) {
 					"contract_address": preprocessToAddress,
 					"data":             preprocessGenericData,
 					"nonce":            "0x22",
-					"method_signature": "approve(address,uint256)",
-					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+					"method_signature": methodSignature,
+					"method_args":      expectedMethodArgs,
 				},
 			},
 		},
@@ -146,8 +149,8 @@ func TestPreprocess(t *testing.T) {
 					"contract_address": preprocessToAddress,
 					"data":             preprocessGenericData,
 					"nonce":            "0x22",
-					"method_signature": "approve(address,uint256)",
-					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+					"method_signature": methodSignature,
+					"method_args":      expectedMethodArgs,
 				},
 			},
 		},

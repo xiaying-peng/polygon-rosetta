@@ -39,7 +39,7 @@ func (a *APIService) ConstructionPreprocess(
 	ctx context.Context,
 	request *types.ConstructionPreprocessRequest,
 ) (*types.ConstructionPreprocessResponse, *types.Error) {
-	var isContractCall bool = false
+	isContractCall := false
 	if _, ok := request.Metadata["method_signature"]; ok {
 		isContractCall = true
 	}
@@ -355,6 +355,10 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 		return data, nil
 	}
 	splitSigByComma := strings.Split(splitSigByTrailingParenthesis[0], ",")
+
+	if len(splitSigByComma) != len(methodArgs) {
+		return nil, errors.New("Invalid method arguments")
+	}
 
 	for i, v := range splitSigByComma {
 		typed, _ := abi.NewType(v, v, nil)

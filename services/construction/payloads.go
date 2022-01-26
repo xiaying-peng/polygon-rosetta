@@ -39,7 +39,7 @@ func (a *APIService) ConstructionPayloads(
 	if err := unmarshalJSONMap(request.Metadata, &metadata); err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 	}
-	var isContractCall bool = false
+	isContractCall := false
 	if hasData(metadata.Data) && !hasTransferData(metadata.Data) {
 		isContractCall = true
 	}

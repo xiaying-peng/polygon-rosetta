@@ -151,9 +151,8 @@ func hasTransferData(data []byte) bool {
 	methodID := data[:4]
 	expectedMethodID, _ := erc20TransferMethodID()
 	res := bytes.Compare(methodID, expectedMethodID)
-	if res == 0 {
-		return true
-	} else {
+	if res != 0 {
 		return false
 	}
+	return true
 }

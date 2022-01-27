@@ -12,51 +12,12 @@
         "transactions": [
             {
                 "transaction_identifier": {
-                    "hash": "0xe79e4719c6770b41405f691c18be3346b691e220d730d6b61abb5dd3ac9d71f0"
+                    "hash": "0xf658e64d2c7dd6a2e32d48c582bbf9db0c45c95db72b4ddd23fe73764849dbdc"
                 },
                 "operations": [
                     {
                         "operation_identifier": {
                             "index": 0
-                        },
-                        "type": "FEE",
-                        "status": "SUCCESS",
-                        "account": {
-                            "address": "0x0000000000000000000000000000000000000000"
-                        },
-                        "amount": {
-                            "value": "0",
-                            "currency": {
-                                "symbol": "MATIC",
-                                "decimals": 18
-                            }
-                        }
-                    },
-                    {
-                        "operation_identifier": {
-                            "index": 1
-                        },
-                        "related_operations": [
-                            {
-                                "index": 0
-                            }
-                        ],
-                        "type": "FEE",
-                        "status": "SUCCESS",
-                        "account": {
-                            "address": "0xC26880A0AF2EA0c7E8130e6EC47Af756465452E8"
-                        },
-                        "amount": {
-                            "value": "0",
-                            "currency": {
-                                "symbol": "MATIC",
-                                "decimals": 18
-                            }
-                        }
-                    },
-                    {
-                        "operation_identifier": {
-                            "index": 2
                         },
                         "type": "PAYMENT",
                         "status": "SUCCESS",
@@ -76,11 +37,11 @@
                     },
                     {
                         "operation_identifier": {
-                            "index": 3
+                            "index": 1
                         },
                         "related_operations": [
                             {
-                                "index": 2
+                                "index": 0
                             }
                         ],
                         "type": "PAYMENT",

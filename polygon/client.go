@@ -951,6 +951,7 @@ func (tx *rpcTransaction) LoadedTransaction() *loadedTransaction {
 		From:        tx.txExtraInfo.From,
 		BlockNumber: tx.txExtraInfo.BlockNumber,
 		BlockHash:   tx.txExtraInfo.BlockHash,
+		TxHash:      tx.TxHash,
 	}
 	return ethTx
 }
@@ -960,6 +961,7 @@ type loadedTransaction struct {
 	From        *common.Address
 	BlockNumber *string
 	BlockHash   *common.Hash
+	TxHash      *common.Hash // may not equal Transaction.Hash() due to state sync indicator
 	FeeAmount   *big.Int
 	FeeBurned   *big.Int // nil if no fees were burned
 	Author      string
@@ -971,6 +973,10 @@ type loadedTransaction struct {
 }
 
 func (ec *Client) feeOps(tx *loadedTransaction, block *EthTypes.Block) []*RosettaTypes.Operation {
+	if tx.FeeAmount.Cmp(new(big.Int)) == 0 {
+		// This can happen for state sync transactions
+		return []*RosettaTypes.Operation{}
+	}
 	var minerEarnedAmount *big.Int
 	if tx.FeeBurned == nil {
 		minerEarnedAmount = tx.FeeAmount
@@ -1178,7 +1184,7 @@ func (ec *Client) populateTransaction(
 
 	populatedTransaction := &RosettaTypes.Transaction{
 		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{
-			Hash: tx.Transaction.Hash().Hex(),
+			Hash: tx.TxHash.Hex(),
 		},
 		Operations: ops,
 		Metadata: map[string]interface{}{

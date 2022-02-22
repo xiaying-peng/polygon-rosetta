@@ -33,10 +33,12 @@ import (
 )
 
 var (
-	metadataFrom        = fromAddress
-	metadataTo          = toAddress
-	metadataData        = transferData
-	metadataGenericData = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
+	metadataFrom              = fromAddress
+	metadataTo                = toAddress
+	metadataData              = transferData
+	metadataGenericData       = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
+	maticTokenContract        = "0x0000000000000000000000000000000000001010"
+	metadataMaticWithdrawData = "0x2e1a7d4d0000000000000000000000000000000000000000000000000000000005f5e100"
 )
 
 func TestMetadata_Offline(t *testing.T) {
@@ -196,6 +198,51 @@ func TestMetadata(t *testing.T) {
 					"data":             metadataGenericData,
 					"method_signature": "approve(address,uint256)",
 					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
+				},
+				SuggestedFee: []*types.Amount{
+					{
+						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimitERC20),
+						Currency: polygon.Currency,
+					},
+				},
+			},
+		},
+		"happy path: Generic contract call with native amount": {
+			options: map[string]interface{}{
+				"from":             metadataFrom,
+				"to":               maticTokenContract,
+				"value":            "0x5f5e100",
+				"nonce":            transferNonceHex2,
+				"contract_address": maticTokenContract,
+				"data":             metadataMaticWithdrawData,
+				"method_signature": "withdraw(uint256)",
+				"method_args":      []string{"100000000"},
+			},
+			mocks: func(ctx context.Context, client *mocks.Client) {
+				var gasPrice *big.Int = nil
+
+				to := common.HexToAddress(maticTokenContract)
+				dataBytes, _ := hexutil.Decode(metadataMaticWithdrawData)
+				client.On("EstimateGas", ctx, ethereum.CallMsg{
+					From:  common.HexToAddress(metadataFrom),
+					To:    &to,
+					Data:  dataBytes,
+					Value: big.NewInt(100000000),
+				}).Return(transferGasLimitERC20, nil)
+
+				client.On("SuggestGasPrice", ctx, gasPrice).
+					Return(big.NewInt(int64(transferGasPrice)), nil)
+			},
+			expectedResponse: &types.ConstructionMetadataResponse{
+				Metadata: map[string]interface{}{
+					"to":               maticTokenContract,
+					"value":            "0x5f5e100",
+					"nonce":            transferNonceHex2,
+					"gas_price":        transferGasPriceHex,
+					"gas_limit":        transferGasLimitERC20Hex,
+					"data":             metadataMaticWithdrawData,
+					"method_signature": "withdraw(uint256)",
+					"method_args":      []interface{}{"100000000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{

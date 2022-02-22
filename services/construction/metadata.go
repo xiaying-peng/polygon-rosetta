@@ -82,7 +82,7 @@ func (a *APIService) ConstructionMetadata(
 		to = checkTokenContractAddress
 
 		var err *types.Error
-		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data)
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +101,7 @@ func (a *APIService) ConstructionMetadata(
 		to = checkContractAddress
 
 		var err *types.Error
-		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data)
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data, input.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -166,13 +166,19 @@ func (a *APIService) calculateGasLimit(
 	from string,
 	to string,
 	data []byte,
+	value *big.Int,
 ) (uint64, *types.Error) {
 	fromAddress := common.HexToAddress(from)
 	toAddress := common.HexToAddress(to)
+	var v *big.Int
+	if value != nil && value.Cmp(big.NewInt(0)) != 0 {
+		v = value
+	}
 	gasLimit, err := a.client.EstimateGas(ctx, ethereum.CallMsg{
-		From: fromAddress,
-		To:   &toAddress,
-		Data: data,
+		From:  fromAddress,
+		To:    &toAddress,
+		Data:  data,
+		Value: v,
 	})
 
 	if err != nil {

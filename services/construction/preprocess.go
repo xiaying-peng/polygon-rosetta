@@ -176,16 +176,17 @@ func matchTransferOperations(operations []*types.Operation, isContractCall bool)
 	*types.Operation,
 	error,
 ) {
-	valueOne, err := strconv.ParseInt(operations[0].Amount.Value, 10, 64)
-	if err != nil {
-		log.Fatal(err)
+	valueOne, valueTwo := new(big.Int), new(big.Int)
+	valueOne, ok := valueOne.SetString(operations[0].Amount.Value, 10)
+	if !ok {
+		log.Fatal("unable to convert valueOne to bigint")
 	}
-	valueTwo, err := strconv.ParseInt(operations[1].Amount.Value, 10, 64)
-	if err != nil {
-		log.Fatal(err)
+	valueTwo, ok = valueTwo.SetString(operations[1].Amount.Value, 10)
+	if !ok {
+		log.Fatal("unable to convert valueTwo to bigint")
 	}
-	if isContractCall && valueOne == 0 {
-		if valueOne != valueTwo {
+	if isContractCall && valueOne.BitLen() == 0 {
+		if valueOne.Cmp(valueTwo) != 0 {
 			return nil, nil, errors.New("for generic call both values should be zero")
 		}
 		descriptions := &parser.Descriptions{
@@ -357,7 +358,7 @@ func constructContractCallData(methodSig string, methodArgs []string) ([]byte, e
 	splitSigByComma := strings.Split(splitSigByTrailingParenthesis[0], ",")
 
 	if len(splitSigByComma) != len(methodArgs) {
-		return nil, errors.New("Invalid method arguments")
+		return nil, errors.New("invalid method arguments")
 	}
 
 	for i, v := range splitSigByComma {

@@ -26,19 +26,21 @@ import (
 )
 
 var (
-	preprocessFromAddress          = fromAddress
-	preprocessToAddress            = toAddress
-	preprocessTokenContractAddress = tokenContractAddress
-	preprocessZeroTransferValue    = uint64(0)
-	preprocessTransferValue        = uint64(1)
-	preprocessTransferValueHex     = hexutil.EncodeUint64(preprocessTransferValue)
-	preprocessData                 = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
-	preprocessGasPrice             = uint64(100000000000)
-	preprocessGasPriceHex          = hexutil.EncodeUint64(preprocessGasPrice)
-	preprocessGenericData          = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
-	methodSignature                = "approve(address,uint256)"
-	methodArgs                     = []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
-	expectedMethodArgs             = []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
+	preprocessFromAddress             = fromAddress
+	preprocessToAddress               = toAddress
+	preprocessTokenContractAddress    = tokenContractAddress
+	preprocessZeroTransferValue       = uint64(0)
+	preprocessTransferValue           = uint64(1)
+	preprocessTransferValueLargeValue = uint64(100000000000)
+	preprocessTransferValueHex        = hexutil.EncodeUint64(preprocessTransferValue)
+	preprocessTransferValueLargeHex   = hexutil.EncodeUint64(preprocessTransferValueLargeValue)
+	preprocessData                    = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
+	preprocessGasPrice                = uint64(100000000000)
+	preprocessGasPriceHex             = hexutil.EncodeUint64(preprocessGasPrice)
+	preprocessGenericData             = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
+	methodSignature                   = "approve(address,uint256)"
+	methodArgs                        = []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
+	expectedMethodArgs                = []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"}
 )
 
 func TestPreprocess(t *testing.T) {
@@ -56,6 +58,16 @@ func TestPreprocess(t *testing.T) {
 					"from":  preprocessFromAddress,
 					"to":    preprocessToAddress,
 					"value": preprocessTransferValueHex,
+				},
+			},
+		},
+		"happy path: native currency with large amount": {
+			operations: templateOperations(preprocessTransferValueLargeValue, polygon.Currency),
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":  preprocessFromAddress,
+					"to":    preprocessToAddress,
+					"value": preprocessTransferValueLargeHex,
 				},
 			},
 		},

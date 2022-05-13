@@ -133,7 +133,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 
 	// Test Metadata
 	metadata := &metadata{
-		GasLimit: big.NewInt(21000),
+		GasLimit: 21000,
 		GasPrice: big.NewInt(1000000000),
 		Nonce:    0,
 		To:       "0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d",
@@ -202,7 +202,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
 		GasPrice: metadata.GasPrice,
-		GasLimit: metadata.GasLimit.Uint64(),
+		GasLimit: metadata.GasLimit,
 		ChainID:  big.NewInt(80001),
 	}
 	assert.Equal(t, &types.ConstructionParseResponse{
@@ -332,7 +332,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 
 	// Test Metadata
 	metadata := &metadata{
-		GasLimit: big.NewInt(21000),
+		GasLimit: 21000,
 		GasPrice: big.NewInt(1000000000),
 		Nonce:    1,
 		To:       "0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d",
@@ -393,7 +393,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
 		GasPrice: metadata.GasPrice,
-		GasLimit: metadata.GasLimit.Uint64(),
+		GasLimit: metadata.GasLimit,
 		ChainID:  big.NewInt(80001),
 	}
 	assert.Equal(t, &types.ConstructionParseResponse{

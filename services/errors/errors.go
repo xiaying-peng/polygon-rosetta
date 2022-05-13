@@ -202,6 +202,13 @@ var (
 		Code:    21, //nolint
 		Message: "Gas price invalid",
 	}
+
+	// ErrInvalidGasLimit is returned when input gas limit
+	// is invalid.
+	ErrInvalidGasLimit = &types.Error{
+		Code:    22, //nolint
+		Message: "Gas limit invalid",
+	}
 )
 
 // WrapErr adds details to the types.Error provided. We use a function

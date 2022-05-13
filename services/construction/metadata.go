@@ -67,6 +67,7 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
+	// by default, initialize gasLimit to the TransferGasLimit
 	gasLimit := polygon.TransferGasLimit
 	to := checkTo
 	// Only work for ERC20 transfer
@@ -82,7 +83,7 @@ func (a *APIService) ConstructionMetadata(
 		to = checkTokenContractAddress
 
 		var err *types.Error
-		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data, nil)
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data, input.Value, input.GasLimit)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +102,7 @@ func (a *APIService) ConstructionMetadata(
 		to = checkContractAddress
 
 		var err *types.Error
-		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data, input.Value)
+		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkContractAddress, input.Data, input.Value, input.GasLimit)
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +117,7 @@ func (a *APIService) ConstructionMetadata(
 	metadata := &metadata{
 		Nonce:           nonce,
 		GasPrice:        gasPrice,
-		GasLimit:        big.NewInt(int64(gasLimit)),
+		GasLimit:        gasLimit,
 		Data:            input.Data,
 		Value:           input.Value,
 		To:              to,
@@ -160,14 +161,20 @@ func (a *APIService) calculateNonce(
 	return nonceInput.Uint64(), nil
 }
 
-// calculatesGasLimit calculates the gasLimit for an ERC20 transfer
+// calculatesGasLimit calculates the gasLimit for an ERC20 transfer if
+// gasLimit is not provided
 func (a *APIService) calculateGasLimit(
 	ctx context.Context,
 	from string,
 	to string,
 	data []byte,
 	value *big.Int,
+	gasLimitInput *big.Int,
 ) (uint64, *types.Error) {
+	if gasLimitInput != nil {
+		return gasLimitInput.Uint64(), nil
+	}
+
 	fromAddress := common.HexToAddress(from)
 	toAddress := common.HexToAddress(to)
 	var v *big.Int

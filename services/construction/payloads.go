@@ -60,7 +60,7 @@ func (a *APIService) ConstructionPayloads(
 	nonce := metadata.Nonce
 	gasPrice := metadata.GasPrice
 	chainID := a.config.Params.ChainID
-	transferGasLimit := metadata.GasLimit.Uint64()
+	transferGasLimit := metadata.GasLimit
 	transferData := metadata.Data
 
 	// Ensure valid from address

@@ -113,7 +113,7 @@ func (a *APIService) ConstructionPreprocess(
 		}
 		preprocessOutputOptions.GasPrice = bigObj
 	}
-	
+
 	// Override gas_limit
 	if v, ok := request.Metadata["gas_limit"]; ok {
 		stringObj, ok := v.(string)

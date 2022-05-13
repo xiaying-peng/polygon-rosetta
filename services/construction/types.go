@@ -64,8 +64,8 @@ type Client interface {
 	) (*types.CallResponse, error)
 }
 
-// Nonce is a *big.Int so that its value can be checked against nil
-// in MarshalJSON and ConstructionMetadata. If uint64 is used instead,
+// Nonce and GasLimit are a *big.Int so that their values can be checked against nil
+// in MarshalJSON and ConstructionMetadata. For nonce, if uint64 is used instead,
 // its nil value will be 0 which is a valid nonce. This will cause
 // ConstructionMetadata to make an extra call to eth_getTransactionCount
 //
@@ -79,7 +79,7 @@ type options struct {
 	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           *big.Int `json:"value,omitempty"`
 	GasPrice        *big.Int `json:"gas_price,omitempty"`
-	GasLimit		*big.Int `json:"gas_limit,omitempty"`
+	GasLimit        *big.Int `json:"gas_limit,omitempty"`
 	MethodSignature string   `json:"method_signature,omitempty"`
 	MethodArgs      []string `json:"method_args,omitempty"`
 }
@@ -93,7 +93,7 @@ type optionsWire struct {
 	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           string   `json:"value,omitempty"`
 	GasPrice        string   `json:"gas_price,omitempty"`
-	GasLimit		string	  `json:"gas_limit,omitempty"`
+	GasLimit        string   `json:"gas_limit,omitempty"`
 	MethodSignature string   `json:"method_signature,omitempty"`
 	MethodArgs      []string `json:"method_args,omitempty"`
 }
@@ -284,7 +284,7 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 type parseMetadata struct {
 	Nonce    uint64   `json:"nonce"`
 	GasPrice *big.Int `json:"gas_price"`
-	GasLimit uint64	  `json:"gas_limit"`
+	GasLimit uint64   `json:"gas_limit"`
 	ChainID  *big.Int `json:"chain_id"`
 }
 

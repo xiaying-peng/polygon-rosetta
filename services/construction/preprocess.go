@@ -114,6 +114,25 @@ func (a *APIService) ConstructionPreprocess(
 		preprocessOutputOptions.GasPrice = bigObj
 	}
 
+	// Override gas_limit
+	if v, ok := request.Metadata["gas_limit"]; ok {
+		stringObj, ok := v.(string)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidGasLimit,
+				fmt.Errorf("%s is not a valid gas_limit string", v),
+			)
+		}
+		bigObj, ok := new(big.Int).SetString(stringObj, 10) //nolint:gomnd
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidGasLimit,
+				fmt.Errorf("%s is not a valid gas_limit", v),
+			)
+		}
+		preprocessOutputOptions.GasLimit = bigObj
+	}
+
 	// Only supports ERC20 transfers
 	currency := fromOp.Amount.Currency
 	if _, ok := request.Metadata["method_signature"]; !ok && !isNativeCurrency(currency) {

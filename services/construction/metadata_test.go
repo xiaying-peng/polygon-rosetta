@@ -39,6 +39,8 @@ var (
 	metadataGenericData       = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
 	maticTokenContract        = "0x0000000000000000000000000000000000001010"
 	metadataMaticWithdrawData = "0x2e1a7d4d0000000000000000000000000000000000000000000000000000000005f5e100"
+
+	metadataGasPriceHex = "0x0"
 )
 
 func TestMetadata_Offline(t *testing.T) {
@@ -75,21 +77,31 @@ func TestMetadata(t *testing.T) {
 					"to":        metadataTo,
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex2,
-					"gas_price": transferGasPriceHex,
+					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitHex,
+					"gas_cap":   transferGasCapHex,
+					"gas_tip":   transferGasTipHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimit),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
 			},
 			mocks: func(ctx context.Context, client *mocks.Client) {
-				var gasPrice *big.Int = nil
+				var blockNum *big.Int = nil
 
-				client.On("SuggestGasPrice", ctx, gasPrice).
-					Return(big.NewInt(int64(transferGasPrice)), nil)
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&header, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
+
+				// var gasPrice *big.Int = nil
+
+				// client.On("SuggestGasPrice", ctx, gasPrice).
+				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 		},
 		"happy path: native currency without nonce": {
@@ -99,25 +111,36 @@ func TestMetadata(t *testing.T) {
 				"value": transferValueHex,
 			},
 			mocks: func(ctx context.Context, client *mocks.Client) {
-				var gasPrice *big.Int = nil
 
 				client.On("PendingNonceAt", ctx, common.HexToAddress(metadataFrom)).
 					Return(transferNonce, nil)
 
-				client.On("SuggestGasPrice", ctx, gasPrice).
-					Return(big.NewInt(int64(transferGasPrice)), nil)
+				var blockNum *big.Int = nil
+
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&header, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
+
+				// var gasPrice *big.Int = nil
+
+				//client.On("SuggestGasPrice", ctx, gasPrice).
+				//	Return(big.NewInt(int64(transferGasTip)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":        metadataTo,
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex,
-					"gas_price": transferGasPriceHex,
+					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitHex,
+					"gas_cap":   transferGasCapHex,
+					"gas_tip":   transferGasTipHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimit),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
@@ -133,7 +156,6 @@ func TestMetadata(t *testing.T) {
 				"data":          metadataData,
 			},
 			mocks: func(ctx context.Context, client *mocks.Client) {
-				var gasPrice *big.Int = nil
 
 				to := common.HexToAddress(tokenContractAddress)
 				dataBytes, _ := hexutil.Decode(metadataData)
@@ -143,21 +165,33 @@ func TestMetadata(t *testing.T) {
 					Data: dataBytes,
 				}).Return(transferGasLimitERC20, nil)
 
-				client.On("SuggestGasPrice", ctx, gasPrice).
-					Return(big.NewInt(int64(transferGasPrice)), nil)
+				var blockNum *big.Int = nil
+
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&header, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
+
+				// var gasPrice *big.Int = nil
+
+				// client.On("SuggestGasPrice", ctx, gasPrice).
+				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":        tokenContractAddress,
 					"value":     "0x0",
 					"nonce":     transferNonceHex2,
-					"gas_price": transferGasPriceHex,
+					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitERC20Hex,
+					"gas_cap":   transferGasCapHex,
+					"gas_tip":   transferGasTipHex,
 					"data":      metadataData,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -175,7 +209,6 @@ func TestMetadata(t *testing.T) {
 				"method_args":      []string{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
 			},
 			mocks: func(ctx context.Context, client *mocks.Client) {
-				var gasPrice *big.Int = nil
 
 				to := common.HexToAddress(tokenContractAddress)
 				dataBytes, _ := hexutil.Decode(metadataGenericData)
@@ -185,23 +218,35 @@ func TestMetadata(t *testing.T) {
 					Data: dataBytes,
 				}).Return(transferGasLimitERC20, nil)
 
-				client.On("SuggestGasPrice", ctx, gasPrice).
-					Return(big.NewInt(int64(transferGasPrice)), nil)
+				var blockNum *big.Int = nil
+
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&header, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
+
+				// var gasPrice *big.Int = nil
+
+				// client.On("SuggestGasPrice", ctx, gasPrice).
+				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":               tokenContractAddress,
 					"value":            "0x0",
 					"nonce":            transferNonceHex2,
-					"gas_price":        transferGasPriceHex,
+					"gas_price":        metadataGasPriceHex,
 					"gas_limit":        transferGasLimitERC20Hex,
+					"gas_cap":   		transferGasCapHex,
+					"gas_tip":   		transferGasTipHex,
 					"data":             metadataGenericData,
 					"method_signature": "approve(address,uint256)",
 					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -219,7 +264,6 @@ func TestMetadata(t *testing.T) {
 				"method_args":      []string{"100000000"},
 			},
 			mocks: func(ctx context.Context, client *mocks.Client) {
-				var gasPrice *big.Int = nil
 
 				to := common.HexToAddress(maticTokenContract)
 				dataBytes, _ := hexutil.Decode(metadataMaticWithdrawData)
@@ -230,23 +274,35 @@ func TestMetadata(t *testing.T) {
 					Value: big.NewInt(100000000),
 				}).Return(transferGasLimitERC20, nil)
 
-				client.On("SuggestGasPrice", ctx, gasPrice).
-					Return(big.NewInt(int64(transferGasPrice)), nil)
+				// var gasPrice *big.Int = nil
+				//
+				// client.On("SuggestGasPrice", ctx, gasPrice).
+				//	Return(big.NewInt(int64(transferGasPrice)), nil)
+
+				var blockNum *big.Int = nil
+
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&header, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":               maticTokenContract,
 					"value":            "0x5f5e100",
 					"nonce":            transferNonceHex2,
-					"gas_price":        transferGasPriceHex,
+					"gas_price":        metadataGasPriceHex,
 					"gas_limit":        transferGasLimitERC20Hex,
+					"gas_cap":   		transferGasCapHex,
+					"gas_tip":   		transferGasTipHex,
 					"data":             metadataMaticWithdrawData,
 					"method_signature": "withdraw(uint256)",
 					"method_args":      []interface{}{"100000000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", transferGasPrice*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},

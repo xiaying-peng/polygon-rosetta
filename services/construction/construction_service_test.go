@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	EthTypes "github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"testing"
 
@@ -48,12 +49,17 @@ var (
 	toAddress            = "0xefD3dc58D60aF3295B92ecd484CAEB3A2f30b3e7"
 	tokenContractAddress = "0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e"
 
+	constructionFromAddress = "0x5aCB42b3cfCD734a57AFF800139ba1354b549159"
+	constructionToAddress = "0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"
+
 	transferValue         = uint64(20211004)
-	transferGasPrice      = uint64(5000000000)
+	transferGasPrice      = uint64(0)
 	transferGasLimit      = uint64(21000)
 	transferGasLimitERC20 = uint64(65000)
 	transferNonce         = uint64(67)
 	transferData          = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e7000000000000000000000000000000000000000000000000000000000134653c" //nolint
+    transferGasCap        = uint64(1001000000)
+	transferGasTip        = uint64(1000000000)
 
 	transferValueHex         = hexutil.EncodeUint64(transferValue)
 	transferGasPriceHex      = hexutil.EncodeUint64(transferGasPrice)
@@ -61,6 +67,26 @@ var (
 	transferGasLimitERC20Hex = hexutil.EncodeUint64(transferGasLimitERC20)
 	transferNonceHex         = hexutil.EncodeUint64(transferNonce)
 	transferNonceHex2        = "0x22"
+	transferGasCapHex        = hexutil.EncodeUint64(transferGasCap)
+	transferGasTipHex        = hexutil.EncodeUint64(transferGasTip)
+
+
+	header = EthTypes.Header{
+		ParentHash: common.Hash{},
+		UncleHash: common.Hash{},
+		Coinbase: common.Address{},
+		Root: common.Hash{},
+		TxHash: common.Hash{},
+		ReceiptHash: common.Hash{},
+		Bloom: EthTypes.Bloom{},
+		Difficulty: nil,
+		Number: nil,
+		GasLimit: 0,
+		GasUsed: 0,
+		Time: 0,
+		Extra: hexutil.Bytes{},
+		BaseFee: big.NewInt(500000),
+	}
 )
 
 func forceHexDecode(t *testing.T, s string) []byte {
@@ -113,7 +139,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, deriveResponse)
 
 	// Test Preprocess
-	intent := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"amount":{"value":"-42894881044106498","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"MATIC","decimals":18}}}]` // nolint
+	intent := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"amount":{"value":"-1000","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"},"amount":{"value":"1000","currency":{"symbol":"MATIC","decimals":18}}}]`
 	var ops []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(intent), &ops))
 	preprocessResponse, err := servicer.ConstructionPreprocess(
@@ -124,7 +150,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		},
 	)
 	assert.Nil(t, err)
-	optionsRaw := `{"from":"0xD10a72Cf054650931365Cc44D912a4FD75257058", "to": "0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d", "value":"0x9864aac3510d02"}` //nolint
+	optionsRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8"}`
 	var options options
 	assert.NoError(t, json.Unmarshal([]byte(optionsRaw), &options))
 	assert.Equal(t, &types.ConstructionPreprocessResponse{
@@ -134,26 +160,44 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	// Test Metadata
 	metadata := &metadata{
 		GasLimit: 21000,
-		GasPrice: big.NewInt(1000000000),
+		GasPrice: big.NewInt(0),
+		GasTip:   big.NewInt(1500000000),
+		GasCap:   big.NewInt(1501000000),
 		Nonce:    0,
-		To:       "0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d",
-		Value:    big.NewInt(42894881044106498),
+		To:       constructionToAddress,
+		Value:    big.NewInt(1000),
 	}
 
-	var gasPrice *big.Int = nil
+	//var gasPrice *big.Int = nil
+	var blockNum *big.Int = nil
 
 	mockClient.On(
-		"SuggestGasPrice",
+		"BlockHeader",
 		ctx,
-		gasPrice,
+		blockNum,
 	).Return(
-		big.NewInt(1000000000),
+		&header,
 		nil,
 	).Once()
 	mockClient.On(
+		"SuggestGasTipCap",
+		ctx,
+	).Return(
+		big.NewInt(1500000000),
+		nil,
+	).Once()
+	//mockClient.On(
+	//	"SuggestGasPrice",
+	//	ctx,
+	//	gasPrice,
+	//).Return(
+	//	big.NewInt(0),
+	//	nil,
+	//).Once()
+	mockClient.On(
 		"PendingNonceAt",
 		ctx,
-		common.HexToAddress("0xD10a72Cf054650931365Cc44D912a4FD75257058"),
+		common.HexToAddress(constructionFromAddress),
 	).Return(
 		uint64(0),
 		nil,
@@ -167,21 +211,21 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		Metadata: forceMarshalMap(t, metadata),
 		SuggestedFee: []*types.Amount{
 			{
-				Value:    "21000000000000",
+				Value:    "31510500000000",
 				Currency: polygon.Currency,
 			},
 		},
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0xD10a72Cf054650931365Cc44D912a4FD75257058","to":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d","value":"0x9864aac3510d02","data":"0x","nonce":"0x0","gas_price":"0x3b9aca00","gas":"0x5208","chain_id":"0x13881"}` // nolint
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x0","gas_price":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
 		Metadata:          forceMarshalMap(t, metadata),
 	})
 	assert.Nil(t, err)
-	payloadsRaw := `[{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058","hex_bytes":"375623b2f9164db0bc050c357fb4e6b57a60ffa1eba0161fe12e96384103218c","account_identifier":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"signature_type":"ecdsa_recovery"}]` // nolint
+	payloadsRaw := `[{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","hex_bytes":"9df2732e3102b2de6c837eb1055292b1f0472b6ae898dff7ba917afc61719120","account_identifier":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var payloads []*types.SigningPayload
 	assert.NoError(t, json.Unmarshal([]byte(payloadsRaw), &payloads))
 	assert.Equal(t, &types.ConstructionPayloadsResponse{
@@ -190,7 +234,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, payloadsResponse)
 
 	// Test Parse Unsigned
-	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"amount":{"value":"-42894881044106498","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"MATIC","decimals":18}}}]` // nolint
+	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"amount":{"value":"-1000","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"},"amount":{"value":"1000","currency":{"symbol":"MATIC","decimals":18}}}]`
 	var parseOps []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(parseOpsRaw), &parseOps))
 	parseUnsignedResponse, err := servicer.ConstructionParse(ctx, &types.ConstructionParseRequest{
@@ -202,6 +246,8 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
 		GasPrice: metadata.GasPrice,
+		GasCap:   metadata.GasCap,
+		GasTip:   metadata.GasTip,
 		GasLimit: metadata.GasLimit,
 		ChainID:  big.NewInt(80001),
 	}
@@ -212,10 +258,10 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, parseUnsignedResponse)
 
 	// Test Combine
-	signaturesRaw := `[{"hex_bytes":"303b2ff05024c20f1775dad9a6e8152fa75bec47c051d7fd2e39572fbddd048e00f2c494280dfa0465d384280dc918c930aae0874714e893382c16058aadf50501","signing_payload":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058","hex_bytes":"375623b2f9164db0bc050c357fb4e6b57a60ffa1eba0161fe12e96384103218c","account_identifier":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"signature_type":"ecdsa_recovery"},"public_key":{"hex_bytes":"0212e9f98d9750e5f74b4b4b00df39074f86c79187943bdb3c5a9c89ffc1ed0188","curve_type":"secp256k1"},"signature_type":"ecdsa_recovery"}]` // nolint
+	signaturesRaw := `[{"hex_bytes":"9f2f61a9a90f6695b10ed04102dca3e0aa50a10263afd861761226e3e61903a62fb42a9e8d96af626e64fd20573338f41d4f90ea9834ce6aa4ff79869181699700","public_key":{"hex_bytes":"0405e82ac561143aafc13ba109677a597c8f797b07417d0addd7a346ad35882b3c4a006620e02127b9a32e90979ff93ecad0a2f577db238163a50023e393e354ff","curve_type":"secp256k1"},"signing_payload":{"hex_bytes":"9df2732e3102b2de6c837eb1055292b1f0472b6ae898dff7ba917afc61719120","address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var signatures []*types.Signature
 	assert.NoError(t, json.Unmarshal([]byte(signaturesRaw), &signatures))
-	signedRaw := `{"type":"0x0","nonce":"0x0","gasPrice":"0x3b9aca00","maxPriorityFeePerGas":null,"maxFeePerGas":null,"gas":"0x5208","value":"0x9864aac3510d02","input":"0x","v":"0x27126","r":"0x303b2ff05024c20f1775dad9a6e8152fa75bec47c051d7fd2e39572fbddd048e","s":"0xf2c494280dfa0465d384280dc918c930aae0874714e893382c16058aadf505","to":"0x57b414a0332b5cab885a451c2a28a07d1e9b8a8d","hash":"0x2500ef3f8531452210cfdfe3c11111e9605a2acdd260ac75c8c3ade30258228e"}` // nolint
+	signedRaw := `{"type":"0x2","nonce":"0x0","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0x59777140","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x9f2f61a9a90f6695b10ed04102dca3e0aa50a10263afd861761226e3e61903a6","s":"0x2fb42a9e8d96af626e64fd20573338f41d4f90ea9834ce6aa4ff798691816997","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0xfacf81ceb293b34292ea428c64a4a550fd5702432908a952aa9d1db455c22c72"}`  //nolint
 	combineResponse, err := servicer.ConstructionCombine(ctx, &types.ConstructionCombineRequest{
 		NetworkIdentifier:   networkIdentifier,
 		UnsignedTransaction: unsignedRaw,
@@ -227,6 +273,9 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, combineResponse)
 
 	// Test Parse Signed
+	var parseSignedOps []*types.Operation
+	assert.NoError(t, json.Unmarshal([]byte(parseOpsRaw), &parseSignedOps))
+
 	parseSignedResponse, err := servicer.ConstructionParse(ctx, &types.ConstructionParseRequest{
 		NetworkIdentifier: networkIdentifier,
 		Signed:            true,
@@ -234,16 +283,16 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, &types.ConstructionParseResponse{
-		Operations: parseOps,
+		Operations: parseSignedOps,
 		AccountIdentifierSigners: []*types.AccountIdentifier{
-			{Address: "0xD10a72Cf054650931365Cc44D912a4FD75257058"},
+			{Address: constructionFromAddress},
 		},
 		Metadata: forceMarshalMap(t, parseMetadata),
 	}, parseSignedResponse)
 
 	// Test Hash
 	transactionIdentifier := &types.TransactionIdentifier{
-		Hash: "0x2500ef3f8531452210cfdfe3c11111e9605a2acdd260ac75c8c3ade30258228e",
+		Hash: "0xfacf81ceb293b34292ea428c64a4a550fd5702432908a952aa9d1db455c22c72",
 	}
 	hashResponse, err := servicer.ConstructionHash(ctx, &types.ConstructionHashRequest{
 		NetworkIdentifier: networkIdentifier,
@@ -311,7 +360,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, deriveResponse)
 
 	// Test Preprocess
-	intent := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"amount":{"value":"-42894881044106498","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"MATIC","decimals":18}}}]` // nolint
+	intent := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"amount":{"value":"-1000","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"},"amount":{"value":"1000","currency":{"symbol":"MATIC","decimals":18}}}]`
 	var ops []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(intent), &ops))
 	preprocessResponse, err := servicer.ConstructionPreprocess(
@@ -323,7 +372,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 		},
 	)
 	assert.Nil(t, err)
-	optionsRaw := `{"from":"0xD10a72Cf054650931365Cc44D912a4FD75257058", "nonce":"0x1", "to":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d", "value":"0x9864aac3510d02"}` // nolint
+	optionsRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","nonce":"0x1","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8"}`
 	var options options
 	assert.NoError(t, json.Unmarshal([]byte(optionsRaw), &options))
 	assert.Equal(t, &types.ConstructionPreprocessResponse{
@@ -333,22 +382,40 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	// Test Metadata
 	metadata := &metadata{
 		GasLimit: 21000,
-		GasPrice: big.NewInt(1000000000),
+		GasPrice: big.NewInt(0),
+		GasTip: big.NewInt(1500000000),
+		GasCap: big.NewInt(1501000000),
 		Nonce:    1,
-		To:       "0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d",
-		Value:    big.NewInt(42894881044106498),
+		To:       constructionToAddress,
+		Value:    big.NewInt(1000),
 	}
 
-	var gasPrice *big.Int = nil
+	// var gasPrice *big.Int = nil
+	var blockNum *big.Int = nil
 
 	mockClient.On(
-		"SuggestGasPrice",
+		"BlockHeader",
 		ctx,
-		gasPrice,
+		blockNum,
 	).Return(
-		big.NewInt(1000000000),
+		&header,
 		nil,
 	).Once()
+	mockClient.On(
+		"SuggestGasTipCap",
+		ctx,
+	).Return(
+		big.NewInt(1500000000),
+		nil,
+	).Once()
+	//mockClient.On(
+	//	"SuggestGasPrice",
+	//	ctx,
+	//	gasPrice,
+	//).Return(
+	//	big.NewInt(1001000000),
+	//	nil,
+	//).Once()
 	metadataResponse, err := servicer.ConstructionMetadata(ctx, &types.ConstructionMetadataRequest{
 		NetworkIdentifier: networkIdentifier,
 		Options:           preprocessResponse.Options,
@@ -358,21 +425,21 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 		Metadata: forceMarshalMap(t, metadata),
 		SuggestedFee: []*types.Amount{
 			{
-				Value:    "21000000000000",
+				Value:    "31510500000000",
 				Currency: polygon.Currency,
 			},
 		},
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0xD10a72Cf054650931365Cc44D912a4FD75257058","to":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d","value":"0x9864aac3510d02","data":"0x","nonce":"0x1","gas_price":"0x3b9aca00","gas":"0x5208","chain_id":"0x13881"}` // nolint
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x1","gas_price":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
 		Metadata:          forceMarshalMap(t, metadata),
 	})
 	assert.Nil(t, err)
-	payloadsRaw := `[{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058","hex_bytes":"9fc67756448ac9767dd028418bc7970d843ffe283ea7b2a96e33392c3e13d3a8","account_identifier":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"signature_type":"ecdsa_recovery"}]` // nolint
+	payloadsRaw := `[{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","hex_bytes":"2fbbd3c6a16a992785dbb6d6f3589d26dbc277aa83657b130b960c0da2422670","account_identifier":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var payloads []*types.SigningPayload
 	assert.NoError(t, json.Unmarshal([]byte(payloadsRaw), &payloads))
 	assert.Equal(t, &types.ConstructionPayloadsResponse{
@@ -381,7 +448,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, payloadsResponse)
 
 	// Test Parse Unsigned
-	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"amount":{"value":"-42894881044106498","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"MATIC","decimals":18}}}]` // nolint
+	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"amount":{"value":"-1000","currency":{"symbol":"MATIC","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"},"amount":{"value":"1000","currency":{"symbol":"MATIC","decimals":18}}}]`
 	var parseOps []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(parseOpsRaw), &parseOps))
 	parseUnsignedResponse, err := servicer.ConstructionParse(ctx, &types.ConstructionParseRequest{
@@ -394,6 +461,8 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 		Nonce:    metadata.Nonce,
 		GasPrice: metadata.GasPrice,
 		GasLimit: metadata.GasLimit,
+		GasCap: metadata.GasCap,
+		GasTip: metadata.GasTip,
 		ChainID:  big.NewInt(80001),
 	}
 	assert.Equal(t, &types.ConstructionParseResponse{
@@ -403,10 +472,10 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, parseUnsignedResponse)
 
 	// Test Combine
-	signaturesRaw := `[{"hex_bytes":"f41bbaff27975ce07e5ab216c33f02384ef79290ef83537c452a61827d80d51a73e5a4707d46f03f4a5841de0623b744942e9edf6e0ef3761acdc40c7f147dc301","signing_payload":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058","hex_bytes":"9fc67756448ac9767dd028418bc7970d843ffe283ea7b2a96e33392c3e13d3a8","account_identifier":{"address":"0xD10a72Cf054650931365Cc44D912a4FD75257058"},"signature_type":"ecdsa_recovery"},"public_key":{"hex_bytes":"0212e9f98d9750e5f74b4b4b00df39074f86c79187943bdb3c5a9c89ffc1ed0188","curve_type":"secp256k1"},"signature_type":"ecdsa_recovery"}]` // nolint
+	signaturesRaw := `[{"hex_bytes":"188597fb9e64a6875ceb033cd55910add342dc9ea5130f8c95010cd74366dc217de32a0d4b3da60dcce83f44b43cd9e733ded9c5da53a4d08b662b8d9e1c32c100","public_key":{"hex_bytes":"0405e82ac561143aafc13ba109677a597c8f797b07417d0addd7a346ad35882b3c4a006620e02127b9a32e90979ff93ecad0a2f577db238163a50023e393e354ff","curve_type":"secp256k1"},"signing_payload":{"hex_bytes":"2fbbd3c6a16a992785dbb6d6f3589d26dbc277aa83657b130b960c0da2422670","address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var signatures []*types.Signature
 	assert.NoError(t, json.Unmarshal([]byte(signaturesRaw), &signatures))
-	signedRaw := `{"type":"0x0","nonce":"0x1","gasPrice":"0x3b9aca00","maxPriorityFeePerGas":null,"maxFeePerGas":null,"gas":"0x5208","value":"0x9864aac3510d02","input":"0x","v":"0x27126","r":"0xf41bbaff27975ce07e5ab216c33f02384ef79290ef83537c452a61827d80d51a","s":"0x73e5a4707d46f03f4a5841de0623b744942e9edf6e0ef3761acdc40c7f147dc3","to":"0x57b414a0332b5cab885a451c2a28a07d1e9b8a8d","hash":"0x06c3e9f1e4d6309b33e86aeb91b0b64d58057246d5d1fb4302bbb3fe2c745b3c"}` // nolint
+	signedRaw := `{"type":"0x2","nonce":"0x1","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0x59777140","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x188597fb9e64a6875ceb033cd55910add342dc9ea5130f8c95010cd74366dc21","s":"0x7de32a0d4b3da60dcce83f44b43cd9e733ded9c5da53a4d08b662b8d9e1c32c1","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0x69589b9f54bfe4a25c807c9d4dac1ebf305b7e806437ebe4cc113b7847439aab"}` // nolint
 	combineResponse, err := servicer.ConstructionCombine(ctx, &types.ConstructionCombineRequest{
 		NetworkIdentifier:   networkIdentifier,
 		UnsignedTransaction: unsignedRaw,
@@ -418,6 +487,8 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, combineResponse)
 
 	// Test Parse Signed
+	var parseSignedOps []*types.Operation
+	assert.NoError(t, json.Unmarshal([]byte(parseOpsRaw), &parseSignedOps))
 	parseSignedResponse, err := servicer.ConstructionParse(ctx, &types.ConstructionParseRequest{
 		NetworkIdentifier: networkIdentifier,
 		Signed:            true,
@@ -425,16 +496,16 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, &types.ConstructionParseResponse{
-		Operations: parseOps,
+		Operations: parseSignedOps,
 		AccountIdentifierSigners: []*types.AccountIdentifier{
-			{Address: "0xD10a72Cf054650931365Cc44D912a4FD75257058"},
+			{Address: constructionFromAddress},
 		},
 		Metadata: forceMarshalMap(t, parseMetadata),
 	}, parseSignedResponse)
 
 	// Test Hash
 	transactionIdentifier := &types.TransactionIdentifier{
-		Hash: "0x06c3e9f1e4d6309b33e86aeb91b0b64d58057246d5d1fb4302bbb3fe2c745b3c",
+		Hash: "0x69589b9f54bfe4a25c807c9d4dac1ebf305b7e806437ebe4cc113b7847439aab",
 	}
 	hashResponse, err := servicer.ConstructionHash(ctx, &types.ConstructionHashRequest{
 		NetworkIdentifier: networkIdentifier,

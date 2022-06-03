@@ -59,6 +59,8 @@ func (a *APIService) ConstructionPayloads(
 	toAdd := metadata.To
 	nonce := metadata.Nonce
 	gasPrice := metadata.GasPrice
+	gasCap := metadata.GasCap
+	gasTip := metadata.GasTip
 	chainID := a.config.Params.ChainID
 	transferGasLimit := metadata.GasLimit
 	transferData := metadata.Data
@@ -75,14 +77,17 @@ func (a *APIService) ConstructionPayloads(
 		return nil, svcErrors.WrapErr(svcErrors.ErrInvalidAddress, fmt.Errorf("%s is not a valid address", toAdd))
 	}
 
-	tx := ethTypes.NewTransaction(
-		nonce,
-		common.HexToAddress(checkTo),
-		amount,
-		transferGasLimit,
-		gasPrice,
-		transferData,
-	)
+	toAddress := common.HexToAddress(checkTo)
+	tx := ethTypes.NewTx(
+		&ethTypes.DynamicFeeTx{
+			Nonce:     nonce,
+			To:        &toAddress,
+			Value:     amount,
+			Gas:       transferGasLimit,
+			GasFeeCap: gasCap,
+			GasTipCap: gasTip,
+			Data:      transferData,
+		})
 
 	unsignedTx := &transaction{
 		From:     checkFrom,
@@ -92,11 +97,13 @@ func (a *APIService) ConstructionPayloads(
 		Nonce:    tx.Nonce(),
 		GasPrice: gasPrice,
 		GasLimit: tx.Gas(),
+		GasCap:   tx.GasFeeCap(),
+		GasTip:   tx.GasTipCap(),
 		ChainID:  chainID,
 	}
 
 	// Construct SigningPayload
-	signer := ethTypes.NewEIP155Signer(chainID)
+	signer := ethTypes.NewLondonSigner(chainID)
 	payload := &types.SigningPayload{
 		AccountIdentifier: &types.AccountIdentifier{Address: checkFrom},
 		Bytes:             signer.Hash(tx).Bytes(),

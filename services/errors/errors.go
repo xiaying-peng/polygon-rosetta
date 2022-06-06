@@ -196,13 +196,6 @@ var (
 		Message: "unable to parse the transaction",
 	}
 
-	// ErrInvalidGasPrice is returned when input gas price
-	// is invalid.
-	ErrInvalidGasPrice = &types.Error{
-		Code:    21, //nolint
-		Message: "Gas price invalid",
-	}
-
 	// ErrInvalidGasLimit is returned when input gas limit
 	// is invalid.
 	ErrInvalidGasLimit = &types.Error{

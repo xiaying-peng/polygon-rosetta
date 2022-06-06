@@ -196,34 +196,9 @@ func (ec *Client) PendingNonceAt(ctx context.Context, account common.Address) (u
 
 // SuggestGasTipCap retrieves the currently suggested gas tip cap after 1559 to
 // allow a timely execution of a transaction.
-//func (ec *Client) GetFeeHistory(ctx context.Context) (*big.Int, error) {
-//	historicalBlocks := 4
-//	var hex hexutil.Big
-//	if err := ec.c.CallContext(ctx, &hex, "eth_feeHistory", historicalBlocks, "pending", nil); err != nil {
-//		return nil, err
-//	}
-//	return (*big.Int)(&hex), nil
-//}
-
-// SuggestGasTipCap retrieves the currently suggested gas tip cap after 1559 to
-// allow a timely execution of a transaction.
 func (ec *Client) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 	var hex hexutil.Big
 	if err := ec.c.CallContext(ctx, &hex, "eth_maxPriorityFeePerGas"); err != nil {
-		return nil, err
-	}
-	return (*big.Int)(&hex), nil
-}
-
-// SuggestGasPrice retrieves the currently suggested gas price to allow a timely
-// execution of a transaction.
-func (ec *Client) SuggestGasPrice(ctx context.Context, gasPrice *big.Int) (*big.Int, error) {
-	if gasPrice != nil {
-		return gasPrice, nil
-	}
-
-	var hex hexutil.Big
-	if err := ec.c.CallContext(ctx, &hex, "eth_gasPrice"); err != nil {
 		return nil, err
 	}
 	return (*big.Int)(&hex), nil
@@ -391,7 +366,7 @@ func (ec *Client) getBlock(
 		txs[i] = tx.tx
 		receipt := receipts[i]
 		gasUsed := new(big.Int).SetUint64(receipt.GasUsed)
-		gasPrice, err := EffectiveGasPrice(txs[i], head.BaseFee)
+		gasPrice, err := effectiveGasPrice(txs[i], head.BaseFee)
 		if err != nil {
 			return nil, nil, fmt.Errorf("%w: failure getting gas price", err)
 		}
@@ -424,9 +399,9 @@ func (ec *Client) getBlock(
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
 }
 
-// EffectiveGasPrice returns the price of gas charged to this transaction to be included in the
+// effectiveGasPrice returns the price of gas charged to this transaction to be included in the
 // block.
-func EffectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, error) {
+func effectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, error) {
 	if tx.Type() != eip1559TxType {
 		return tx.GasPrice(), nil
 	}

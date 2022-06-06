@@ -168,7 +168,6 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		Value:    big.NewInt(1000),
 	}
 
-	//var gasPrice *big.Int = nil
 	var blockNum *big.Int = nil
 
 	mockClient.On(
@@ -186,14 +185,6 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		big.NewInt(1500000000),
 		nil,
 	).Once()
-	//mockClient.On(
-	//	"SuggestGasPrice",
-	//	ctx,
-	//	gasPrice,
-	//).Return(
-	//	big.NewInt(0),
-	//	nil,
-	//).Once()
 	mockClient.On(
 		"PendingNonceAt",
 		ctx,
@@ -390,7 +381,6 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 		Value:    big.NewInt(1000),
 	}
 
-	// var gasPrice *big.Int = nil
 	var blockNum *big.Int = nil
 
 	mockClient.On(
@@ -408,14 +398,6 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 		big.NewInt(1500000000),
 		nil,
 	).Once()
-	//mockClient.On(
-	//	"SuggestGasPrice",
-	//	ctx,
-	//	gasPrice,
-	//).Return(
-	//	big.NewInt(1001000000),
-	//	nil,
-	//).Once()
 	metadataResponse, err := servicer.ConstructionMetadata(ctx, &types.ConstructionMetadataRequest{
 		NetworkIdentifier: networkIdentifier,
 		Options:           preprocessResponse.Options,

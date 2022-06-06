@@ -169,42 +169,6 @@ func TestPreprocess(t *testing.T) {
 				},
 			},
 		},
-		"happy path: native currency with gas price": {
-			operations: templateOperations(preprocessTransferValue, polygon.Currency),
-			metadata: map[string]interface{}{
-				"gas_price": "100000000000",
-			},
-			expectedResponse: &types.ConstructionPreprocessResponse{
-				Options: map[string]interface{}{
-					"from":      preprocessFromAddress,
-					"to":        preprocessToAddress,
-					"value":     preprocessTransferValueHex,
-					"gas_price": preprocessGasPriceHex,
-				},
-			},
-		},
-		"happy path: ERC20 currency with gas price": {
-			operations: templateOperations(preprocessTransferValue, &types.Currency{
-				Symbol:   "USDC",
-				Decimals: 18,
-				Metadata: map[string]interface{}{
-					"token_address": preprocessTokenContractAddress,
-				},
-			}),
-			metadata: map[string]interface{}{
-				"gas_price": "100000000000",
-			},
-			expectedResponse: &types.ConstructionPreprocessResponse{
-				Options: map[string]interface{}{
-					"from":          preprocessFromAddress,
-					"to":            preprocessToAddress,
-					"value":         "0x0",
-					"token_address": preprocessTokenContractAddress,
-					"data":          preprocessData,
-					"gas_price":     preprocessGasPriceHex,
-				},
-			},
-		},
 		"happy path: native currency with gas limit": {
 			operations: templateOperations(preprocessTransferValue, polygon.Currency),
 			metadata: map[string]interface{}{
@@ -347,24 +311,6 @@ func TestPreprocess(t *testing.T) {
 			expectedResponse: nil,
 			expectedError: templateError(
 				svcErrors.ErrInvalidNonce, "invalid_nonce is not a valid nonce"),
-		},
-		"error: invalid gas price string": {
-			operations: templateOperations(preprocessTransferValue, polygon.Currency),
-			metadata: map[string]interface{}{
-				"gas_price": map[string]string{},
-			},
-			expectedResponse: nil,
-			expectedError: templateError(
-				svcErrors.ErrInvalidGasPrice, "map[] is not a valid gas_price string"),
-		},
-		"error: invalid gas price": {
-			operations: templateOperations(preprocessTransferValue, polygon.Currency),
-			metadata: map[string]interface{}{
-				"gas_price": "gas_price",
-			},
-			expectedResponse: nil,
-			expectedError: templateError(
-				svcErrors.ErrInvalidGasPrice, "gas_price is not a valid gas_price"),
 		},
 		"error: invalid gas limit string": {
 			operations: templateOperations(preprocessTransferValue, polygon.Currency),

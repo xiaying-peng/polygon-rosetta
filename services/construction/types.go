@@ -54,8 +54,6 @@ type Client interface {
 
 	EstimateGas(ctx context.Context, msg ethereum.CallMsg) (uint64, error)
 
-	SuggestGasPrice(ctx context.Context, gasPrice *big.Int) (*big.Int, error)
-
 	BlockHeader(ctx context.Context, number *big.Int) (*ethTypes.Header, error)
 
 	SendTransaction(ctx context.Context, tx *ethTypes.Transaction) error

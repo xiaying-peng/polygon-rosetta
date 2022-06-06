@@ -119,16 +119,13 @@ func (a *APIService) ConstructionMetadata(
 
 	var gasCap *big.Int
 	if input.GasCap == nil {
+		// Set default max fee to double the last base fee plus priority tip
+		// to ensure tx is highly likely to go out in the next block
 		multiplier := big.NewInt(2)
 		gasCap = new(big.Int).Add(gasTip, new(big.Int).Mul(header.BaseFee, multiplier))
 	} else {
 		gasCap = input.GasCap
 	}
-
-	// gasPrice, err := a.client.SuggestGasPrice(ctx, input.GasPrice)
-	// if err != nil {
-	//	return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
-	//}
 
 	metadata := &metadata{
 		Nonce:           nonce,

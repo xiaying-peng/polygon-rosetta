@@ -17,11 +17,12 @@ package construction
 import (
 	"context"
 	"encoding/json"
+	"testing"
+
 	"github.com/coinbase/rosetta-sdk-go/types"
 	svcError "github.com/maticnetwork/polygon-rosetta/services/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
-)
+	)
 
 
 func TestConstructionCombine(t *testing.T) {

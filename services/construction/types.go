@@ -425,7 +425,7 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	gasPrice := big.NewInt(0)
+	gasPrice, err := hexutil.DecodeBig(tw.GasPrice)
 	if err != nil {
 		return err
 	}

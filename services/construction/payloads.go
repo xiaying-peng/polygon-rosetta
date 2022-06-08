@@ -58,7 +58,6 @@ func (a *APIService) ConstructionPayloads(
 	amount := metadata.Value
 	toAdd := metadata.To
 	nonce := metadata.Nonce
-	gasPrice := metadata.GasPrice
 	gasCap := metadata.GasCap
 	gasTip := metadata.GasTip
 	chainID := a.config.Params.ChainID
@@ -95,7 +94,6 @@ func (a *APIService) ConstructionPayloads(
 		Value:    amount,
 		Data:     tx.Data(),
 		Nonce:    tx.Nonce(),
-		GasPrice: gasPrice,
 		GasLimit: tx.Gas(),
 		GasCap:   tx.GasFeeCap(),
 		GasTip:   tx.GasTipCap(),

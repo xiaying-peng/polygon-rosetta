@@ -53,7 +53,6 @@ var (
 	constructionToAddress = "0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"
 
 	transferValue         = uint64(20211004)
-	transferGasPrice      = uint64(0)
 	transferGasLimit      = uint64(21000)
 	transferGasLimitERC20 = uint64(65000)
 	transferNonce         = uint64(67)
@@ -62,7 +61,6 @@ var (
 	transferGasTip        = uint64(1000000000)
 
 	transferValueHex         = hexutil.EncodeUint64(transferValue)
-	transferGasPriceHex      = hexutil.EncodeUint64(transferGasPrice)
 	transferGasLimitHex      = hexutil.EncodeUint64(transferGasLimit)
 	transferGasLimitERC20Hex = hexutil.EncodeUint64(transferGasLimitERC20)
 	transferNonceHex         = hexutil.EncodeUint64(transferNonce)
@@ -160,7 +158,6 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	// Test Metadata
 	metadata := &metadata{
 		GasLimit: 21000,
-		GasPrice: big.NewInt(0),
 		GasTip:   big.NewInt(1500000000),
 		GasCap:   big.NewInt(1501000000),
 		Nonce:    0,
@@ -209,7 +206,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x0","gas_price":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
@@ -236,7 +233,6 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	assert.Nil(t, err)
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
-		GasPrice: metadata.GasPrice,
 		GasCap:   metadata.GasCap,
 		GasTip:   metadata.GasTip,
 		GasLimit: metadata.GasLimit,
@@ -373,7 +369,6 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	// Test Metadata
 	metadata := &metadata{
 		GasLimit: 21000,
-		GasPrice: big.NewInt(0),
 		GasTip: big.NewInt(1500000000),
 		GasCap: big.NewInt(1501000000),
 		Nonce:    1,
@@ -414,7 +409,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x1","gas_price":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x1","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
@@ -441,7 +436,6 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	assert.Nil(t, err)
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
-		GasPrice: metadata.GasPrice,
 		GasLimit: metadata.GasLimit,
 		GasCap: metadata.GasCap,
 		GasTip: metadata.GasTip,

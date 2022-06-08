@@ -209,6 +209,13 @@ var (
 		Code:    23, //nolint
 		Message: "Gas cap invalid",
 	}
+
+	// ErrInvalidGasTip is returned when input gas cap
+	// is invalid.
+	ErrInvalidGasTip = &types.Error{
+		Code:    24, //nolint
+		Message: "Gas tip invalid",
+	}
 )
 
 // WrapErr adds details to the types.Error provided. We use a function

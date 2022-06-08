@@ -80,7 +80,6 @@ type options struct {
 	TokenAddress    string   `json:"token_address,omitempty"`
 	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           *big.Int `json:"value,omitempty"`
-	GasPrice        *big.Int `json:"gas_price,omitempty"`
 	GasLimit        *big.Int `json:"gas_limit,omitempty"`
 	GasCap          *big.Int `json:"gas_cap,omitempty"`
 	GasTip          *big.Int `json:"gas_tip,omitempty"`
@@ -96,7 +95,6 @@ type optionsWire struct {
 	TokenAddress    string   `json:"token_address,omitempty"`
 	ContractAddress string   `json:"contract_address,omitempty"`
 	Value           string   `json:"value,omitempty"`
-	GasPrice        string   `json:"gas_price,omitempty"`
 	GasLimit        string   `json:"gas_limit,omitempty"`
 	GasCap          string   `json:"gas_cap,omitempty"`
 	GasTip          string   `json:"gas_tip,omitempty"`
@@ -124,10 +122,6 @@ func (o *options) MarshalJSON() ([]byte, error) {
 
 	if o.Value != nil {
 		ow.Value = hexutil.EncodeBig(o.Value)
-	}
-
-	if o.GasPrice != nil {
-		ow.GasPrice = hexutil.EncodeBig(o.GasPrice)
 	}
 
 	if o.GasLimit != nil {
@@ -181,14 +175,6 @@ func (o *options) UnmarshalJSON(data []byte) error {
 		o.Value = value
 	}
 
-	if len(ow.GasPrice) > 0 {
-		gasPrice, err := hexutil.DecodeBig(ow.GasPrice)
-		if err != nil {
-			return err
-		}
-		o.GasPrice = gasPrice
-	}
-
 	if len(ow.GasLimit) > 0 {
 		gasLimit, err := hexutil.DecodeBig(ow.GasLimit)
 		if err != nil {
@@ -218,7 +204,6 @@ func (o *options) UnmarshalJSON(data []byte) error {
 
 type metadata struct {
 	Nonce           uint64   `json:"nonce"`
-	GasPrice        *big.Int `json:"gas_price"`
 	GasCap          *big.Int `json:"gas_cap"`
 	GasTip          *big.Int `json:"gas_tip"`
 	GasLimit        uint64   `json:"gas_limit,omitempty"`
@@ -231,7 +216,6 @@ type metadata struct {
 
 type metadataWire struct {
 	Nonce           string   `json:"nonce"`
-	GasPrice        string   `json:"gas_price"`
 	GasCap          string   `json:"gas_cap"`
 	GasTip          string   `json:"gas_tip"`
 	GasLimit        string   `json:"gas_limit,omitempty"`
@@ -245,7 +229,6 @@ type metadataWire struct {
 func (m *metadata) MarshalJSON() ([]byte, error) {
 	mw := &metadataWire{
 		Nonce:           hexutil.Uint64(m.Nonce).String(),
-		GasPrice:        hexutil.EncodeBig(m.GasPrice),
 		GasCap:          hexutil.EncodeBig(m.GasCap),
 		GasTip:          hexutil.EncodeBig(m.GasTip),
 		To:              m.To,
@@ -279,11 +262,6 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	gasPrice, err := hexutil.DecodeBig(mw.GasPrice)
-	if err != nil {
-		return err
-	}
-
 	gasCap, err := hexutil.DecodeBig(mw.GasCap)
 	if err != nil {
 		return err
@@ -294,7 +272,6 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	m.GasPrice = gasPrice
 	m.GasCap = gasCap
 	m.GasTip = gasTip
 	m.Nonce = nonce
@@ -331,7 +308,6 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 
 type parseMetadata struct {
 	Nonce    uint64   `json:"nonce"`
-	GasPrice *big.Int `json:"gas_price"`
 	GasLimit uint64   `json:"gas_limit"`
 	GasCap   *big.Int `json:"gas_cap"`
 	GasTip   *big.Int `json:"gas_tip"`
@@ -340,7 +316,6 @@ type parseMetadata struct {
 
 type parseMetadataWire struct {
 	Nonce    string `json:"nonce"`
-	GasPrice string `json:"gas_price"`
 	GasLimit string `json:"gas_limit"`
 	GasCap   string `json:"gas_cap"`
 	GasTip   string `json:"gas_tip"`
@@ -350,7 +325,6 @@ type parseMetadataWire struct {
 func (p *parseMetadata) MarshalJSON() ([]byte, error) {
 	pmw := &parseMetadataWire{
 		Nonce:    hexutil.Uint64(p.Nonce).String(),
-		GasPrice: hexutil.EncodeBig(p.GasPrice),
 		GasLimit: hexutil.Uint64(p.GasLimit).String(),
 		GasCap:   hexutil.EncodeBig(p.GasCap),
 		GasTip:   hexutil.EncodeBig(p.GasTip),
@@ -366,7 +340,6 @@ type transaction struct {
 	Value    *big.Int `json:"value"`
 	Data     []byte   `json:"data"`
 	Nonce    uint64   `json:"nonce"`
-	GasPrice *big.Int `json:"gas_price"`
 	GasCap 	 *big.Int `json:"max_fee_per_gas"`
 	GasTip   *big.Int `json:"max_priority_fee_per_gas"`
 	GasLimit uint64   `json:"gas"`
@@ -379,7 +352,6 @@ type transactionWire struct {
 	Value    string `json:"value"`
 	Data     string `json:"data"`
 	Nonce    string `json:"nonce"`
-	GasPrice string `json:"gas_price"`
 	GasCap 	 string `json:"max_fee_per_gas"`
 	GasTip   string `json:"max_priority_fee_per_gas"`
 	GasLimit string `json:"gas"`
@@ -393,7 +365,6 @@ func (t *transaction) MarshalJSON() ([]byte, error) {
 		Value:    hexutil.EncodeBig(t.Value),
 		Data:     hexutil.Encode(t.Data),
 		Nonce:    hexutil.EncodeUint64(t.Nonce),
-		GasPrice: hexutil.EncodeBig(t.GasPrice),
 		GasLimit: hexutil.EncodeUint64(t.GasLimit),
 		GasCap:   hexutil.EncodeBig(t.GasCap),
 		GasTip:   hexutil.EncodeBig(t.GasTip),
@@ -425,11 +396,6 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	gasPrice, err := hexutil.DecodeBig(tw.GasPrice)
-	if err != nil {
-		return err
-	}
-
 	gasLimit, err := hexutil.DecodeUint64(tw.GasLimit)
 	if err != nil {
 		return err
@@ -454,7 +420,6 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 	t.Value = value
 	t.Data = twData
 	t.Nonce = nonce
-	t.GasPrice = gasPrice
 	t.GasLimit = gasLimit
 	t.GasCap = gasCap
 	t.GasTip = gasTip

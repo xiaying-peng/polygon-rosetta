@@ -35,10 +35,10 @@ var (
 	preprocessTransferValueHex        = hexutil.EncodeUint64(preprocessTransferValue)
 	preprocessTransferValueLargeHex   = hexutil.EncodeUint64(preprocessTransferValueLargeValue)
 	preprocessData                    = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
-	preprocessGasPrice                = uint64(100000000000)
-	preprocessGasPriceHex             = hexutil.EncodeUint64(preprocessGasPrice)
 	preprocessGasLimit                = uint64(600000)
 	preprocessGasLimitHex             = hexutil.EncodeUint64(preprocessGasLimit)
+	preprocessGasTip                  = uint64(20000000)
+	preprocessGasTipHex               = hexutil.EncodeUint64(preprocessGasTip)
 	preprocessGasCap                  = uint64(5000000000)
 	preprocessGasCapHex               = hexutil.EncodeUint64(preprocessGasCap)
 	preprocessGenericData             = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
@@ -241,6 +241,42 @@ func TestPreprocess(t *testing.T) {
 				},
 			},
 		},
+		"happy path: native currency with gas tip": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"gas_tip": "20000000",
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":      preprocessFromAddress,
+					"to":        preprocessToAddress,
+					"value":     preprocessTransferValueHex,
+					"gas_tip":   preprocessGasTipHex,
+				},
+			},
+		},
+		"happy path: ERC20 currency with gas tip": {
+			operations: templateOperations(preprocessTransferValue, &types.Currency{
+				Symbol:   "USDC",
+				Decimals: 18,
+				Metadata: map[string]interface{}{
+					"token_address": preprocessTokenContractAddress,
+				},
+			}),
+			metadata: map[string]interface{}{
+				"gas_tip": "20000000",
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":          preprocessFromAddress,
+					"to":            preprocessToAddress,
+					"value":         "0x0",
+					"token_address": preprocessTokenContractAddress,
+					"data":          preprocessData,
+					"gas_tip":       preprocessGasTipHex,
+				},
+			},
+		},
 		"error: both positive amount": {
 			operations: func() []*types.Operation {
 				operations := templateOperations(preprocessTransferValue, polygon.Currency)
@@ -347,6 +383,24 @@ func TestPreprocess(t *testing.T) {
 			expectedResponse: nil,
 			expectedError: templateError(
 				svcErrors.ErrInvalidGasCap, "gas_cap is not a valid gas_cap"),
+		},
+		"error: invalid gas tip string": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"gas_tip": map[string]string{},
+			},
+			expectedResponse: nil,
+			expectedError: templateError(
+				svcErrors.ErrInvalidGasTip, "map[] is not a valid gas_tip string"),
+		},
+		"error: invalid gas tip": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"gas_tip": "gas_tip",
+			},
+			expectedResponse: nil,
+			expectedError: templateError(
+				svcErrors.ErrInvalidGasTip, "gas_tip is not a valid gas_tip"),
 		},
 		"error: missing token address": {
 			operations: templateOperations(preprocessTransferValue, &types.Currency{

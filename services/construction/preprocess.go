@@ -95,6 +95,25 @@ func (a *APIService) ConstructionPreprocess(
 		preprocessOutputOptions.Nonce = bigObj
 	}
 
+	// Override gas_tip
+	if v, ok := request.Metadata["gas_tip"]; ok {
+		stringObj, ok := v.(string)
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidGasTip,
+				fmt.Errorf("%s is not a valid gas_tip string", v),
+			)
+		}
+		bigObj, ok := new(big.Int).SetString(stringObj, 10) //nolint:gomnd
+		if !ok {
+			return nil, svcErrors.WrapErr(
+				svcErrors.ErrInvalidGasTip,
+				fmt.Errorf("%s is not a valid gas_tip", v),
+			)
+		}
+		preprocessOutputOptions.GasTip = bigObj
+	}
+
 	// Override gas_cap
 	if v, ok := request.Metadata["gas_cap"]; ok {
 		stringObj, ok := v.(string)

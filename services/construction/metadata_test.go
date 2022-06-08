@@ -40,7 +40,6 @@ var (
 	maticTokenContract        = "0x0000000000000000000000000000000000001010"
 	metadataMaticWithdrawData = "0x2e1a7d4d0000000000000000000000000000000000000000000000000000000005f5e100"
 
-	metadataGasPriceHex = "0x0"
 )
 
 func TestMetadata_Offline(t *testing.T) {
@@ -77,7 +76,6 @@ func TestMetadata(t *testing.T) {
 					"to":        metadataTo,
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex2,
-					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitHex,
 					"gas_cap":   transferGasCapHex,
 					"gas_tip":   transferGasTipHex,
@@ -98,10 +96,6 @@ func TestMetadata(t *testing.T) {
 				client.On("SuggestGasTipCap", ctx).
 					Return(big.NewInt(int64(transferGasTip)), nil)
 
-				// var gasPrice *big.Int = nil
-
-				// client.On("SuggestGasPrice", ctx, gasPrice).
-				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 		},
 		"happy path: native currency without nonce": {
@@ -123,17 +117,12 @@ func TestMetadata(t *testing.T) {
 				client.On("SuggestGasTipCap", ctx).
 					Return(big.NewInt(int64(transferGasTip)), nil)
 
-				// var gasPrice *big.Int = nil
-
-				//client.On("SuggestGasPrice", ctx, gasPrice).
-				//	Return(big.NewInt(int64(transferGasTip)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":        metadataTo,
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex,
-					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitHex,
 					"gas_cap":   transferGasCapHex,
 					"gas_tip":   transferGasTipHex,
@@ -173,17 +162,12 @@ func TestMetadata(t *testing.T) {
 				client.On("SuggestGasTipCap", ctx).
 					Return(big.NewInt(int64(transferGasTip)), nil)
 
-				// var gasPrice *big.Int = nil
-
-				// client.On("SuggestGasPrice", ctx, gasPrice).
-				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":        tokenContractAddress,
 					"value":     "0x0",
 					"nonce":     transferNonceHex2,
-					"gas_price": metadataGasPriceHex,
 					"gas_limit": transferGasLimitERC20Hex,
 					"gas_cap":   transferGasCapHex,
 					"gas_tip":   transferGasTipHex,
@@ -226,17 +210,12 @@ func TestMetadata(t *testing.T) {
 				client.On("SuggestGasTipCap", ctx).
 					Return(big.NewInt(int64(transferGasTip)), nil)
 
-				// var gasPrice *big.Int = nil
-
-				// client.On("SuggestGasPrice", ctx, gasPrice).
-				//	Return(big.NewInt(int64(transferGasPrice)), nil)
 			},
 			expectedResponse: &types.ConstructionMetadataResponse{
 				Metadata: map[string]interface{}{
 					"to":               tokenContractAddress,
 					"value":            "0x0",
 					"nonce":            transferNonceHex2,
-					"gas_price":        metadataGasPriceHex,
 					"gas_limit":        transferGasLimitERC20Hex,
 					"gas_cap":   		transferGasCapHex,
 					"gas_tip":   		transferGasTipHex,
@@ -274,11 +253,6 @@ func TestMetadata(t *testing.T) {
 					Value: big.NewInt(100000000),
 				}).Return(transferGasLimitERC20, nil)
 
-				// var gasPrice *big.Int = nil
-				//
-				// client.On("SuggestGasPrice", ctx, gasPrice).
-				//	Return(big.NewInt(int64(transferGasPrice)), nil)
-
 				var blockNum *big.Int = nil
 
 				client.On("BlockHeader", ctx, blockNum).
@@ -292,7 +266,6 @@ func TestMetadata(t *testing.T) {
 					"to":               maticTokenContract,
 					"value":            "0x5f5e100",
 					"nonce":            transferNonceHex2,
-					"gas_price":        metadataGasPriceHex,
 					"gas_limit":        transferGasLimitERC20Hex,
 					"gas_cap":   		transferGasCapHex,
 					"gas_tip":   		transferGasTipHex,

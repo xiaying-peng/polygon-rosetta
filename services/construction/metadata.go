@@ -129,7 +129,6 @@ func (a *APIService) ConstructionMetadata(
 
 	metadata := &metadata{
 		Nonce:           nonce,
-		GasPrice:        big.NewInt(0),
 		GasLimit:        gasLimit,
 		GasCap:          gasCap,
 		GasTip: 		 gasTip,

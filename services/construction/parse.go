@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
@@ -49,7 +48,6 @@ func (a *APIService) ConstructionParse(
 		tx.Value = t.Value()
 		tx.Data = t.Data()
 		tx.Nonce = t.Nonce()
-		tx.GasPrice = big.NewInt(0)
 		tx.GasCap = t.GasFeeCap()
 		tx.GasTip = t.GasTipCap()
 		tx.GasLimit = t.Gas()
@@ -104,7 +102,6 @@ func (a *APIService) ConstructionParse(
 
 	metadata := &parseMetadata{
 		Nonce:    tx.Nonce,
-		GasPrice: tx.GasPrice,
 		GasCap:   tx.GasCap,
 		GasTip:   tx.GasTip,
 		GasLimit: tx.GasLimit,

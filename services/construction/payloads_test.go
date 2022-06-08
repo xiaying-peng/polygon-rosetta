@@ -33,7 +33,6 @@ import (
 
 var (
 	invalidTransferData = "0xaaaaaaaa000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
-	payloadsGasPriceHex = "0x0"
 
 )
 
@@ -196,7 +195,6 @@ func templateNativeCurrencyTxMetadata(amount string) map[string]interface{} {
 		"nonce":     transferNonceHex,
 		"to":        metadataTo,
 		"value":     amount,
-		"gas_price": payloadsGasPriceHex,
 		"gas_limit": transferGasLimitHex,
 		"gas_cap":   transferGasCapHex,
 		"gas_tip":   transferGasTipHex,
@@ -208,7 +206,6 @@ func templateERC20CurrencyTxMetadata() map[string]interface{} {
 		"nonce":     transferNonceHex,
 		"to":        tokenContractAddress,
 		"value":     "0x0",
-		"gas_price": payloadsGasPriceHex,
 		"gas_limit": transferGasLimitERC20Hex,
 		"gas_cap":   transferGasCapHex,
 		"gas_tip":   transferGasTipHex,
@@ -218,13 +215,12 @@ func templateERC20CurrencyTxMetadata() map[string]interface{} {
 
 func templateNativeCurrencyUnsigned() string {
 	return fmt.Sprintf(
-		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","gas_price":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
+		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
 		metadataFrom,
 		metadataTo,
 		transferValueHex,
 		"0x",
 		transferNonceHex,
-		payloadsGasPriceHex,
 		transferGasCapHex,
 		transferGasTipHex,
 		transferGasLimitHex,
@@ -234,13 +230,12 @@ func templateNativeCurrencyUnsigned() string {
 
 func templateERC20CurrencyUnsigned() string {
 	return fmt.Sprintf(
-		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","gas_price":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
+		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
 		metadataFrom,
 		tokenContractAddress,
 		"0x0",
 		metadataData,
 		transferNonceHex,
-		payloadsGasPriceHex,
 		transferGasCapHex,
 		transferGasTipHex,
 		transferGasLimitERC20Hex,
@@ -253,7 +248,6 @@ func templateGenericContractCallTxMetadata() map[string]interface{} {
 		"nonce":            transferNonceHex,
 		"to":               tokenContractAddress,
 		"value":            "0x0",
-		"gas_price":        payloadsGasPriceHex,
 		"gas_limit":        transferGasLimitERC20Hex,
 		"gas_cap":          transferGasCapHex,
 		"gas_tip":          transferGasTipHex,
@@ -265,13 +259,12 @@ func templateGenericContractCallTxMetadata() map[string]interface{} {
 
 func templateGenericContractCallUnsigned() string {
 	return fmt.Sprintf(
-		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","gas_price":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
+		`{"from":"%s","to":"%s","value":"%s","data":"%s","nonce":"%s","max_fee_per_gas":"%s","max_priority_fee_per_gas":"%s","gas":"%s","chain_id":"%s"}`, //nolint:lll
 		metadataFrom,
 		tokenContractAddress,
 		"0x0",
 		metadataGenericData,
 		transferNonceHex,
-		payloadsGasPriceHex,
 		transferGasCapHex,
 		transferGasTipHex,
 		transferGasLimitERC20Hex,

@@ -81,7 +81,6 @@ func (a *APIService) ConstructionMetadata(
 		}
 		// Override the destination address to be the contract address
 		to = checkTokenContractAddress
-
 		var err *types.Error
 		gasLimit, err = a.calculateGasLimit(ctx, checkFrom, checkTokenContractAddress, input.Data, input.Value, input.GasLimit)
 		if err != nil {
@@ -108,16 +107,31 @@ func (a *APIService) ConstructionMetadata(
 		}
 	}
 
-	// TODO: Upgrade to use EIP1559
-	gasPrice, err := a.client.SuggestGasPrice(ctx, input.GasPrice)
+	header, err :=  a.client.BlockHeader(ctx, nil)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
+	gasTip, err := a.client.SuggestGasTipCap(ctx)
+	if err != nil {
+		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
+	}
+
+	var gasCap *big.Int
+	if input.GasCap == nil {
+		// Set default max fee to double the last base fee plus priority tip
+		// to ensure tx is highly likely to go out in the next block
+		multiplier := big.NewInt(2)
+		gasCap = new(big.Int).Add(gasTip, new(big.Int).Mul(header.BaseFee, multiplier))
+	} else {
+		gasCap = input.GasCap
+	}
+
 	metadata := &metadata{
 		Nonce:           nonce,
-		GasPrice:        gasPrice,
 		GasLimit:        gasLimit,
+		GasCap:          gasCap,
+		GasTip: 		 gasTip,
 		Data:            input.Data,
 		Value:           input.Value,
 		To:              to,
@@ -131,7 +145,7 @@ func (a *APIService) ConstructionMetadata(
 	}
 
 	// Find suggested gas usage
-	suggestedFee := metadata.GasPrice.Int64() * int64(gasLimit)
+	suggestedFee := (header.BaseFee.Int64() + metadata.GasTip.Int64()) * int64(gasLimit)
 
 	return &types.ConstructionMetadataResponse{
 		Metadata: metadataMap,

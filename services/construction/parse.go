@@ -38,6 +38,7 @@ func (a *APIService) ConstructionParse(
 		}
 	} else {
 		t := new(ethTypes.Transaction)
+
 		err := t.UnmarshalJSON([]byte(request.Transaction))
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
@@ -47,11 +48,12 @@ func (a *APIService) ConstructionParse(
 		tx.Value = t.Value()
 		tx.Data = t.Data()
 		tx.Nonce = t.Nonce()
-		tx.GasPrice = t.GasPrice()
+		tx.GasCap = t.GasFeeCap()
+		tx.GasTip = t.GasTipCap()
 		tx.GasLimit = t.Gas()
 		tx.ChainID = t.ChainId()
 
-		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()), nil)
+		msg, err := t.AsMessage(ethTypes.NewLondonSigner(t.ChainId()), nil)
 		if err != nil {
 			return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 		}
@@ -100,7 +102,8 @@ func (a *APIService) ConstructionParse(
 
 	metadata := &parseMetadata{
 		Nonce:    tx.Nonce,
-		GasPrice: tx.GasPrice,
+		GasCap:   tx.GasCap,
+		GasTip:   tx.GasTip,
 		GasLimit: tx.GasLimit,
 		ChainID:  tx.ChainID,
 	}
@@ -126,6 +129,7 @@ func (a *APIService) ConstructionParse(
 			AccountIdentifierSigners: []*types.AccountIdentifier{},
 			Metadata:                 metaMap,
 		}
+
 	}
 	return resp, nil
 }

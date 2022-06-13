@@ -43,16 +43,18 @@ func (a *APIService) ConstructionCombine(
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 	}
 
-	ethTransaction := ethTypes.NewTransaction(
-		unsignedTx.Nonce,
-		common.HexToAddress(unsignedTx.To),
-		unsignedTx.Value,
-		unsignedTx.GasLimit,
-		unsignedTx.GasPrice,
-		unsignedTx.Data,
-	)
-
-	signer := ethTypes.NewEIP155Signer(unsignedTx.ChainID)
+	toAddress := common.HexToAddress(unsignedTx.To)
+	ethTransaction := ethTypes.NewTx(
+		&ethTypes.DynamicFeeTx{
+			Nonce:     unsignedTx.Nonce,
+			To:        &toAddress,
+			Value:     unsignedTx.Value,
+			Gas:       unsignedTx.GasLimit,
+			GasFeeCap: unsignedTx.GasCap,
+			GasTipCap: unsignedTx.GasTip,
+			Data:      unsignedTx.Data,
+		})
+	signer := ethTypes.NewLondonSigner(unsignedTx.ChainID)
 	signedTx, err := ethTransaction.WithSignature(signer, request.Signatures[0].Bytes)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrInvalidSignature, err)

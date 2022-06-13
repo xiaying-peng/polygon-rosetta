@@ -87,6 +87,7 @@ type Client struct {
 	burntContract map[string]string
 }
 
+// ClientConfig holds asset config information
 type ClientConfig struct {
 	URL            string
 	ChainConfig    *params.ChainConfig
@@ -149,7 +150,7 @@ func (ec *Client) Status(ctx context.Context) (
 	[]*RosettaTypes.Peer,
 	error,
 ) {
-	header, err := ec.blockHeader(ctx, nil)
+	header, err := ec.BlockHeader(ctx, nil)
 	if err != nil {
 		return nil, -1, nil, nil, err
 	}
@@ -193,15 +194,11 @@ func (ec *Client) PendingNonceAt(ctx context.Context, account common.Address) (u
 	return uint64(result), err
 }
 
-// SuggestGasPrice retrieves the currently suggested gas price to allow a timely
-// execution of a transaction.
-func (ec *Client) SuggestGasPrice(ctx context.Context, gasPrice *big.Int) (*big.Int, error) {
-	if gasPrice != nil {
-		return gasPrice, nil
-	}
-
+// SuggestGasTipCap retrieves the currently suggested gas tip cap after 1559 to
+// allow a timely execution of a transaction.
+func (ec *Client) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 	var hex hexutil.Big
-	if err := ec.c.CallContext(ctx, &hex, "eth_gasPrice"); err != nil {
+	if err := ec.c.CallContext(ctx, &hex, "eth_maxPriorityFeePerGas"); err != nil {
 		return nil, err
 	}
 	return (*big.Int)(&hex), nil
@@ -255,7 +252,9 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 	if err != nil {
 		return err
 	}
-	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", hexutil.Encode(data))
+	// We have to remove the first two bytes otherwise DynamicFeeTxs will not send:
+	// https://ethereum.stackexchange.com/questions/124447/eth-sendrawtransaction-with-dynamicfeetx-returns-expected-input-list-for-types
+	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", hexutil.Encode(data[2:]))
 }
 
 func toBlockNumArg(number *big.Int) string {
@@ -289,9 +288,9 @@ func (ec *Client) Block(
 	return ec.getParsedBlock(ctx, "eth_getBlockByNumber", toBlockNumArg(nil), true)
 }
 
-// Header returns a block header from the current canonical chain. If number is
+// BlockHeader returns a block header from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (ec *Client) blockHeader(ctx context.Context, number *big.Int) (*types.Header, error) {
+func (ec *Client) BlockHeader(ctx context.Context, number *big.Int) (*types.Header, error) {
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
 	if err == nil && head == nil {
@@ -1517,7 +1516,7 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 	return arg
 }
 
-// This implementation is taken from:
+// CalculateBurntContract implementation is taken from:
 // https://github.com/maticnetwork/bor/blob/c227a072418626dd758ceabffd2ea7dadac6eecb/params/config.go#L527
 //
 // TODO: Depend on maticnetwork fork of go-ethereum instead of stock geth so we don't need to

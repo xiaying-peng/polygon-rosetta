@@ -1008,7 +1008,6 @@ func TestCall_InvalidMethod(t *testing.T) {
 func TestBlock(t *testing.T) {
 	var tests = map[string]struct {
 		blockNum               int
-		blockNumHexString      string
 		useLatest              bool
 		author                 string
 		blockHash              string
@@ -1019,7 +1018,6 @@ func TestBlock(t *testing.T) {
 	}{
 		"current block (latest)": {
 			blockNum:               10992,
-			blockNumHexString:      "0x2af0",
 			useLatest:              true,
 			author:                 nilAddress,
 			blockHash:              "0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae",
@@ -1029,7 +1027,6 @@ func TestBlock(t *testing.T) {
 		},
 		"block by hash (historical)": {
 			blockNum:          10992,
-			blockNumHexString: "0x2af0",
 			useLatest:         false,
 			author:            nilAddress,
 			blockHash:         "0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae",
@@ -1042,7 +1039,6 @@ func TestBlock(t *testing.T) {
 		},
 		"block by index (historical)": {
 			blockNum:          10992,
-			blockNumHexString: "0x2af0",
 			useLatest:         false,
 			author:            nilAddress,
 			blockHash:         "0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae",
@@ -1054,11 +1050,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with transaction": {
-			blockNum:          10994,
-			blockNumHexString: "0x2af2",
-			useLatest:         false,
-			author:            "0xfFC614eE978630D7fB0C06758DeB580c152154d3",
-			blockHash:         "0xb6a2558c2e54bfb11247d0764311143af48d122f29fc408d9519f47d70aa2d50",
+			blockNum:  10994,
+			useLatest: false,
+			author:    "0xfFC614eE978630D7fB0C06758DeB580c152154d3",
+			blockHash: "0xb6a2558c2e54bfb11247d0764311143af48d122f29fc408d9519f47d70aa2d50",
 			transactions: []string{
 				"0xd83b1dcf7d47c4115d78ce0361587604e8157591b118bd64ada02e86c9d5ca7e",
 			},
@@ -1069,11 +1064,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with three ERC20 transfer transactions": {
-			blockNum:          19594674,
-			blockNumHexString: "0x12afdb2",
-			useLatest:         false,
-			author:            "0xE4b8e9222704401aD16d4d826732953DAf07C7E2",
-			blockHash:         "0x80714362cc0b6ce164de611c6383c63c3783a9e0f6445e7c6e87b92159ec09ce",
+			blockNum:  19594674,
+			useLatest: false,
+			author:    "0xE4b8e9222704401aD16d4d826732953DAf07C7E2",
+			blockHash: "0x80714362cc0b6ce164de611c6383c63c3783a9e0f6445e7c6e87b92159ec09ce",
 			// 3 sample transactions corresponding to the following contract addresses:
 			// 0xf6ab4ba2c101ac9b120d6b9aeb211487bbd8058b
 			// 0x8bb570731cbd353203caa75478186918146c867b
@@ -1094,11 +1088,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with three transactions, one containing multiple ERC20 transfers (of the same token)": {
-			blockNum:          20062432,
-			blockNumHexString: "0x13220e0",
-			useLatest:         false,
-			author:            "0xc275DC8bE39f50D12F66B6a63629C39dA5BAe5bd",
-			blockHash:         "0xfa80cb6a745c5f98f812626876c7de54816db318c5d090c38bd99905812f5450",
+			blockNum:  20062432,
+			useLatest: false,
+			author:    "0xc275DC8bE39f50D12F66B6a63629C39dA5BAe5bd",
+			blockHash: "0xfa80cb6a745c5f98f812626876c7de54816db318c5d090c38bd99905812f5450",
 			// 3 sample transactions; 2 correspond with the following contract addresses (the 3rd is a transfer)
 			// 0x51eFAbE1718be9940c5f4D10F1983a46d99EC4D9
 			// 0x5da92e52854F12eC7D8E32Fba7a573473D648D18 ; contains multiple ERC20 transfers
@@ -1117,11 +1110,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with partially successful transaction": {
-			blockNum:          239782,
-			blockNumHexString: "0x3a8a6",
-			useLatest:         false,
-			author:            "0xe9fB1e9B0D782f6ef112Ad3A4c9E39Dfc13754aC",
-			blockHash:         "0xc4487850a40d85b79cf5e5b69db38284fbd39efcf902ca8a6d9f2ba89c538ea3",
+			blockNum:  239782,
+			useLatest: false,
+			author:    "0xe9fB1e9B0D782f6ef112Ad3A4c9E39Dfc13754aC",
+			blockHash: "0xc4487850a40d85b79cf5e5b69db38284fbd39efcf902ca8a6d9f2ba89c538ea3",
 			transactions: []string{
 				"0x05613760334d347e771fad61b1815c8c817b8dd5f0fcbba57c3f2df67dec33d6",
 			},
@@ -1132,11 +1124,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with transfer to destroyed contract": {
-			blockNum:          363415,
-			blockNumHexString: "0x58b97",
-			useLatest:         false,
-			author:            "0x93Cb12397d6BEa4BfDC03a4B6E33c16aC1b15638",
-			blockHash:         "0xf0445269b02ba461af662d8c6aac50d9557a0cc9dbe580d3e180efd7879cc79e",
+			blockNum:  363415,
+			useLatest: false,
+			author:    "0x93Cb12397d6BEa4BfDC03a4B6E33c16aC1b15638",
+			blockHash: "0xf0445269b02ba461af662d8c6aac50d9557a0cc9dbe580d3e180efd7879cc79e",
 			transactions: []string{
 				"0x9e0f7c64a5bf1fc9f3d7b7963cf23f74e3d2c0b2b3f35f26df031954e5581179",
 				"0x0046a7c3ca126864a3e851235ca6bf030300f9138f035f5f190e59ff9a4b22ff",
@@ -1148,11 +1139,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with Test ERC20 state sync (no MATIC change)": {
-			blockNum:          135808,
-			blockNumHexString: "0x21280",
-			useLatest:         false,
-			author:            "0xC26880A0AF2EA0c7E8130e6EC47Af756465452E8",
-			blockHash:         "0xda45a0d75e06aacf58a5a359f7c011e9d17254a0e7f95d99d373ef52b7da3f3d",
+			blockNum:  135808,
+			useLatest: false,
+			author:    "0xC26880A0AF2EA0c7E8130e6EC47Af756465452E8",
+			blockHash: "0xda45a0d75e06aacf58a5a359f7c011e9d17254a0e7f95d99d373ef52b7da3f3d",
 			transactions: []string{
 				"0xf658e64d2c7dd6a2e32d48c582bbf9db0c45c95db72b4ddd23fe73764849dbdc",
 			},
@@ -1165,11 +1155,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with MATIC deposit state sync": {
-			blockNum:          147648,
-			blockNumHexString: "0x240c0",
-			useLatest:         false,
-			author:            "0xC26880A0AF2EA0c7E8130e6EC47Af756465452E8",
-			blockHash:         "0xcbce8f3ca9545917f8c675fbf1723685ce3e18f8ce62ab0893aee813a12d6d27",
+			blockNum:  147648,
+			useLatest: false,
+			author:    "0xC26880A0AF2EA0c7E8130e6EC47Af756465452E8",
+			blockHash: "0xcbce8f3ca9545917f8c675fbf1723685ce3e18f8ce62ab0893aee813a12d6d27",
 			transactions: []string{
 				"0x3f4a5a9cbd755b65c85954650abc7c2c39331311bf8490b8ed42c1e0349f65a3",
 			},
@@ -1180,11 +1169,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with transfer to precompiled": {
-			blockNum:          363753,
-			blockNumHexString: "0x58ce9",
-			useLatest:         false,
-			author:            "0x817562f86cEE143236962249453AE54E2b530140",
-			blockHash:         "0x3defb56cc49cf7603e08749516a003baae0944596e4555b0d868ec225ff2bcd3",
+			blockNum:  363753,
+			useLatest: false,
+			author:    "0x817562f86cEE143236962249453AE54E2b530140",
+			blockHash: "0x3defb56cc49cf7603e08749516a003baae0944596e4555b0d868ec225ff2bcd3",
 			transactions: []string{
 				"0x586d0a158f29da3d0e8fa4d24596d1a9f6ded03b5ccdb68f40e9372980488fc8",
 				"0x80fb7e6bfa8dae67cf79f21b9e68c5af727ba52f3ab1e5a5be5c8048a9758f56",
@@ -1196,11 +1184,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with complex self-destruct": {
-			blockNum:          468179,
-			blockNumHexString: "0x724d3",
-			useLatest:         false,
-			author:            "0x01711853335F857442eF6f349B2467C531731318",
-			blockHash:         "0xd88e8376ec3eef899d9fbc6349e8330ebfc102b245fef784a999ac854091cb64",
+			blockNum:  468179,
+			useLatest: false,
+			author:    "0x01711853335F857442eF6f349B2467C531731318",
+			blockHash: "0xd88e8376ec3eef899d9fbc6349e8330ebfc102b245fef784a999ac854091cb64",
 			transactions: []string{
 				"0x712f7aed1ac12f8a38b4caefea8e7c1940c88add78e110b194c653c9efb3a75d",
 				"0x99b723ac54002b16049143474d80f8e6358d14dec2250d873511d091de74977d",
@@ -1212,11 +1199,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with complex resurrection": {
-			blockNum:          363366,
-			blockNumHexString: "0x58b66",
-			useLatest:         false,
-			author:            "0x3D6F8823Ad21CD299814B62D198d9001E67E20B3",
-			blockHash:         "0x5f7c67c2eb0e828b0f4a0e64d5fbae0ed66b70c9ae752e6175c9ef62402502df",
+			blockNum:  363366,
+			useLatest: false,
+			author:    "0x3D6F8823Ad21CD299814B62D198d9001E67E20B3",
+			blockHash: "0x5f7c67c2eb0e828b0f4a0e64d5fbae0ed66b70c9ae752e6175c9ef62402502df",
 			transactions: []string{
 				"0x3f11ca203c7fd814751725c2c5a3efa00bebbbd5e89f406a28b4a36559393b6f",
 				"0x4cc86d845b6ee5c12db00cc75c42e98f8bbf62060bc925942c5ff6a36878549b",
@@ -1229,11 +1215,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with blackholed funds": {
-			blockNum:          468194,
-			blockNumHexString: "0x724e2",
-			useLatest:         false,
-			author:            "0x01711853335F857442eF6f349B2467C531731318",
-			blockHash:         "0xf0d9ab47473e38f98b195ba7a17934f68519168f5fdec9899b3c18180d8fbb54",
+			blockNum:  468194,
+			useLatest: false,
+			author:    "0x01711853335F857442eF6f349B2467C531731318",
+			blockHash: "0xf0d9ab47473e38f98b195ba7a17934f68519168f5fdec9899b3c18180d8fbb54",
 			transactions: []string{
 				"0xbd54f0c5742a5c96ffb358680b88a0f6cfbf83d599dbd0b8fff66b59ed0d7f81",
 				"0xf3626ec6a7aba22137b012e8e68513dcaf8574d0412b97e4381513a3ca9ecfc0",
@@ -1245,11 +1230,10 @@ func TestBlock(t *testing.T) {
 			error: nil,
 		},
 		"block with EIP-1559 transactions": {
-			blockNum:          22743478,
-			blockNumHexString: "0x15b09b6",
-			useLatest:         false,
-			author:            "0xbe188d6641e8b680743a4815dfa0f6208038960f",
-			blockHash:         "0x168014f6a57da23c2bb37712c36e302c50f63ce402589681b4ab0337d58643ea",
+			blockNum:  22743478,
+			useLatest: false,
+			author:    "0xbe188d6641e8b680743a4815dfa0f6208038960f",
+			blockHash: "0x168014f6a57da23c2bb37712c36e302c50f63ce402589681b4ab0337d58643ea",
 			transactions: []string{
 				"0x5eebf10b54ade620cd62f26a5bb8e667bd3677571758aeff3c56dfebd76004f7",
 				"0x3f35fb14e5fce0eab47256e06c5112f741a177347bb86c0f32be089db15f96d5",
@@ -1269,6 +1253,7 @@ func TestBlock(t *testing.T) {
 			ctx := context.Background()
 			mockClient, err := createMockClient(ctx, t)
 			assert.NoError(t, err)
+			blockNumHexString := fmt.Sprintf("0x%x", test.blockNum)
 
 			// If we're checking the latest block, we should mock that specific block (with a "latest" identifier).
 			// Otherwise, we need to make additional checks before deciding.
@@ -1279,11 +1264,11 @@ func TestBlock(t *testing.T) {
 				if test.partialBlockIdentifier.Hash != nil {
 					mockClient.mockGetBlockByHash(test.blockNum, test.blockHash)
 				} else {
-					mockClient.mockGetBlockByNumber(test.blockNum, test.blockNumHexString)
+					mockClient.mockGetBlockByNumber(test.blockNum, blockNumHexString)
 				}
 			}
 
-			mockClient.mockGetAuthor(test.blockNumHexString, test.author)
+			mockClient.mockGetAuthor(blockNumHexString, test.author)
 			mockClient.mockTraceBlockByHash(test.blockHash)
 
 			if test.transactions != nil {

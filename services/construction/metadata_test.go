@@ -76,12 +76,12 @@ func TestMetadata(t *testing.T) {
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitHex,
-					"gas_cap":   transferGasCapHex,
+					"gas_cap":   transferGasCapWithTipHex,
 					"gas_tip":   transferGasTipHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimit),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
@@ -123,15 +123,49 @@ func TestMetadata(t *testing.T) {
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex,
 					"gas_limit": transferGasLimitHex,
-					"gas_cap":   transferGasCapHex,
+					"gas_cap":   transferGasCapWithTipHex,
 					"gas_tip":   transferGasTipHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimit),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
+			},
+		},
+		"happy path: native currency with gas tip set to 30 gwei floor": {
+			options: map[string]interface{}{
+				"from":  metadataFrom,
+				"to":    metadataTo,
+				"value": transferValueHex,
+				"nonce": transferNonceHex2,
+			},
+			expectedResponse: &types.ConstructionMetadataResponse{
+				Metadata: map[string]interface{}{
+					"to":        metadataTo,
+					"value":     transferValueHex,
+					"nonce":     transferNonceHex2,
+					"gas_limit": transferGasLimitHex,
+					"gas_cap":   minGasCapHex,
+					"gas_tip":   transferGasTipHex,
+				},
+				SuggestedFee: []*types.Amount{
+					{
+						Value:    fmt.Sprintf("%d", (minGasCap.Uint64())*transferGasLimit),
+						Currency: polygon.Currency,
+					},
+				},
+			},
+			mocks: func(ctx context.Context, client *mocks.Client) {
+				var blockNum *big.Int = nil
+
+				client.On("BlockHeader", ctx, blockNum).
+					Return(&headerWithLowBaseFee, nil)
+
+				client.On("SuggestGasTipCap", ctx).
+					Return(big.NewInt(int64(transferGasTip)), nil)
+
 			},
 		},
 		"happy path: ERC20 currency with nonce": {
@@ -168,13 +202,13 @@ func TestMetadata(t *testing.T) {
 					"value":     "0x0",
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitERC20Hex,
-					"gas_cap":   transferGasCapHex,
+					"gas_cap":   transferGasCapWithTipHex,
 					"gas_tip":   transferGasTipHex,
 					"data":      metadataData,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -216,7 +250,7 @@ func TestMetadata(t *testing.T) {
 					"value":            "0x0",
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
-					"gas_cap":          transferGasCapHex,
+					"gas_cap":          transferGasCapWithTipHex,
 					"gas_tip":          transferGasTipHex,
 					"data":             metadataGenericData,
 					"method_signature": "approve(address,uint256)",
@@ -224,7 +258,7 @@ func TestMetadata(t *testing.T) {
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -266,7 +300,7 @@ func TestMetadata(t *testing.T) {
 					"value":            "0x5f5e100",
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
-					"gas_cap":          transferGasCapHex,
+					"gas_cap":          transferGasCapWithTipHex,
 					"gas_tip":          transferGasTipHex,
 					"data":             metadataMaticWithdrawData,
 					"method_signature": "withdraw(uint256)",
@@ -274,7 +308,7 @@ func TestMetadata(t *testing.T) {
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},

@@ -18,9 +18,10 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	EthTypes "github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"testing"
+
+	EthTypes "github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
@@ -50,14 +51,14 @@ var (
 	tokenContractAddress = "0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e"
 
 	constructionFromAddress = "0x5aCB42b3cfCD734a57AFF800139ba1354b549159"
-	constructionToAddress = "0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"
+	constructionToAddress   = "0x3Fa177c2E87Cb24148EC403921dB577d140CC07c"
 
 	transferValue         = uint64(20211004)
 	transferGasLimit      = uint64(21000)
 	transferGasLimitERC20 = uint64(65000)
 	transferNonce         = uint64(67)
 	transferData          = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e7000000000000000000000000000000000000000000000000000000000134653c" //nolint
-    transferGasCap        = uint64(1001000000)
+	transferGasCap        = uint64(1001000000)
 	transferGasTip        = uint64(1000000000)
 
 	transferValueHex         = hexutil.EncodeUint64(transferValue)
@@ -68,22 +69,21 @@ var (
 	transferGasCapHex        = hexutil.EncodeUint64(transferGasCap)
 	transferGasTipHex        = hexutil.EncodeUint64(transferGasTip)
 
-
 	header = EthTypes.Header{
-		ParentHash: common.Hash{},
-		UncleHash: common.Hash{},
-		Coinbase: common.Address{},
-		Root: common.Hash{},
-		TxHash: common.Hash{},
+		ParentHash:  common.Hash{},
+		UncleHash:   common.Hash{},
+		Coinbase:    common.Address{},
+		Root:        common.Hash{},
+		TxHash:      common.Hash{},
 		ReceiptHash: common.Hash{},
-		Bloom: EthTypes.Bloom{},
-		Difficulty: nil,
-		Number: nil,
-		GasLimit: 0,
-		GasUsed: 0,
-		Time: 0,
-		Extra: hexutil.Bytes{},
-		BaseFee: big.NewInt(500000),
+		Bloom:       EthTypes.Bloom{},
+		Difficulty:  nil,
+		Number:      nil,
+		GasLimit:    0,
+		GasUsed:     0,
+		Time:        0,
+		Extra:       hexutil.Bytes{},
+		BaseFee:     big.NewInt(30000000000), // equivalent to 30 gwei
 	}
 )
 
@@ -199,14 +199,14 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		Metadata: forceMarshalMap(t, metadata),
 		SuggestedFee: []*types.Amount{
 			{
-				Value:    "31510500000000",
+				Value:    "661500000000000",
 				Currency: polygon.Currency,
 			},
 		},
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x0","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x0","max_fee_per_gas":"0x59682f00","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
@@ -248,7 +248,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	signaturesRaw := `[{"hex_bytes":"9f2f61a9a90f6695b10ed04102dca3e0aa50a10263afd861761226e3e61903a62fb42a9e8d96af626e64fd20573338f41d4f90ea9834ce6aa4ff79869181699700","public_key":{"hex_bytes":"0405e82ac561143aafc13ba109677a597c8f797b07417d0addd7a346ad35882b3c4a006620e02127b9a32e90979ff93ecad0a2f577db238163a50023e393e354ff","curve_type":"secp256k1"},"signing_payload":{"hex_bytes":"9df2732e3102b2de6c837eb1055292b1f0472b6ae898dff7ba917afc61719120","address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var signatures []*types.Signature
 	assert.NoError(t, json.Unmarshal([]byte(signaturesRaw), &signatures))
-	signedRaw := `{"type":"0x2","nonce":"0x0","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0x59777140","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x9f2f61a9a90f6695b10ed04102dca3e0aa50a10263afd861761226e3e61903a6","s":"0x2fb42a9e8d96af626e64fd20573338f41d4f90ea9834ce6aa4ff798691816997","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0xfacf81ceb293b34292ea428c64a4a550fd5702432908a952aa9d1db455c22c72"}`  //nolint
+	signedRaw := `{"type":"0x2","nonce":"0x0","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0xe51af8700","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x9f2f61a9a90f6695b10ed04102dca3e0aa50a10263afd861761226e3e61903a6","s":"0x2fb42a9e8d96af626e64fd20573338f41d4f90ea9834ce6aa4ff798691816997","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0xfacf81ceb293b34292ea428c64a4a550fd5702432908a952aa9d1db455c22c72"}` //nolint
 	combineResponse, err := servicer.ConstructionCombine(ctx, &types.ConstructionCombineRequest{
 		NetworkIdentifier:   networkIdentifier,
 		UnsignedTransaction: unsignedRaw,
@@ -369,8 +369,8 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	// Test Metadata
 	metadata := &metadata{
 		GasLimit: 21000,
-		GasTip: big.NewInt(1500000000),
-		GasCap: big.NewInt(1501000000),
+		GasTip:   big.NewInt(1500000000),
+		GasCap:   big.NewInt(1501000000),
 		Nonce:    1,
 		To:       constructionToAddress,
 		Value:    big.NewInt(1000),
@@ -409,7 +409,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	}, metadataResponse)
 
 	// Test Payloads
-	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x1","max_fee_per_gas":"0x59777140","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
+	unsignedRaw := `{"from":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159","to":"0x3Fa177c2E87Cb24148EC403921dB577d140CC07c","value":"0x3e8","data":"0x","nonce":"0x1","max_fee_per_gas":"0xe51af8700","max_priority_fee_per_gas":"0x59682f00","gas":"0x5208","chain_id":"0x13881"}`
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
@@ -437,8 +437,8 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	parseMetadata := &parseMetadata{
 		Nonce:    metadata.Nonce,
 		GasLimit: metadata.GasLimit,
-		GasCap: metadata.GasCap,
-		GasTip: metadata.GasTip,
+		GasCap:   metadata.GasCap,
+		GasTip:   metadata.GasTip,
 		ChainID:  big.NewInt(80001),
 	}
 	assert.Equal(t, &types.ConstructionParseResponse{
@@ -451,7 +451,7 @@ func TestConstructionFlowWithInputNonce(t *testing.T) {
 	signaturesRaw := `[{"hex_bytes":"188597fb9e64a6875ceb033cd55910add342dc9ea5130f8c95010cd74366dc217de32a0d4b3da60dcce83f44b43cd9e733ded9c5da53a4d08b662b8d9e1c32c100","public_key":{"hex_bytes":"0405e82ac561143aafc13ba109677a597c8f797b07417d0addd7a346ad35882b3c4a006620e02127b9a32e90979ff93ecad0a2f577db238163a50023e393e354ff","curve_type":"secp256k1"},"signing_payload":{"hex_bytes":"2fbbd3c6a16a992785dbb6d6f3589d26dbc277aa83657b130b960c0da2422670","address":"0x5aCB42b3cfCD734a57AFF800139ba1354b549159"},"signature_type":"ecdsa_recovery"}]`
 	var signatures []*types.Signature
 	assert.NoError(t, json.Unmarshal([]byte(signaturesRaw), &signatures))
-	signedRaw := `{"type":"0x2","nonce":"0x1","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0x59777140","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x188597fb9e64a6875ceb033cd55910add342dc9ea5130f8c95010cd74366dc21","s":"0x7de32a0d4b3da60dcce83f44b43cd9e733ded9c5da53a4d08b662b8d9e1c32c1","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0x69589b9f54bfe4a25c807c9d4dac1ebf305b7e806437ebe4cc113b7847439aab"}` // nolint
+	signedRaw := `{"type":"0x2","nonce":"0x1","gasPrice":null,"maxPriorityFeePerGas":"0x59682f00","maxFeePerGas":"0xe51af8700","gas":"0x5208","value":"0x3e8","input":"0x","v":"0x0","r":"0x188597fb9e64a6875ceb033cd55910add342dc9ea5130f8c95010cd74366dc21","s":"0x7de32a0d4b3da60dcce83f44b43cd9e733ded9c5da53a4d08b662b8d9e1c32c1","to":"0x3fa177c2e87cb24148ec403921db577d140cc07c","chainId":"0x13881","accessList":[],"hash":"0x69589b9f54bfe4a25c807c9d4dac1ebf305b7e806437ebe4cc113b7847439aab"}` // nolint
 	combineResponse, err := servicer.ConstructionCombine(ctx, &types.ConstructionCombineRequest{
 		NetworkIdentifier:   networkIdentifier,
 		UnsignedTransaction: unsignedRaw,

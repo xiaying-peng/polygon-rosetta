@@ -39,7 +39,6 @@ var (
 	metadataGenericData       = "0x095ea7b3000000000000000000000000d10a72cf054650931365cc44d912a4fd7525705800000000000000000000000000000000000000000000000000000000000003e8"
 	maticTokenContract        = "0x0000000000000000000000000000000000001010"
 	metadataMaticWithdrawData = "0x2e1a7d4d0000000000000000000000000000000000000000000000000000000005f5e100"
-
 )
 
 func TestMetadata_Offline(t *testing.T) {
@@ -82,7 +81,7 @@ func TestMetadata(t *testing.T) {
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimit),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
@@ -129,7 +128,7 @@ func TestMetadata(t *testing.T) {
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimit),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
@@ -175,7 +174,7 @@ func TestMetadata(t *testing.T) {
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -217,15 +216,15 @@ func TestMetadata(t *testing.T) {
 					"value":            "0x0",
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
-					"gas_cap":   		transferGasCapHex,
-					"gas_tip":   		transferGasTipHex,
+					"gas_cap":          transferGasCapHex,
+					"gas_tip":          transferGasTipHex,
 					"data":             metadataGenericData,
 					"method_signature": "approve(address,uint256)",
 					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},
@@ -267,15 +266,15 @@ func TestMetadata(t *testing.T) {
 					"value":            "0x5f5e100",
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
-					"gas_cap":   		transferGasCapHex,
-					"gas_tip":   		transferGasTipHex,
+					"gas_cap":          transferGasCapHex,
+					"gas_tip":          transferGasTipHex,
 					"data":             metadataMaticWithdrawData,
 					"method_signature": "withdraw(uint256)",
 					"method_args":      []interface{}{"100000000"},
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64() + transferGasTip) * transferGasLimitERC20),
+						Value:    fmt.Sprintf("%d", (header.BaseFee.Uint64()+transferGasTip)*transferGasLimitERC20),
 						Currency: polygon.Currency,
 					},
 				},

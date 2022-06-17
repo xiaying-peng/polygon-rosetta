@@ -212,10 +212,10 @@ func TestPreprocess(t *testing.T) {
 			},
 			expectedResponse: &types.ConstructionPreprocessResponse{
 				Options: map[string]interface{}{
-					"from":      preprocessFromAddress,
-					"to":        preprocessToAddress,
-					"value":     preprocessTransferValueHex,
-					"gas_cap":   preprocessGasCapHex,
+					"from":    preprocessFromAddress,
+					"to":      preprocessToAddress,
+					"value":   preprocessTransferValueHex,
+					"gas_cap": preprocessGasCapHex,
 				},
 			},
 		},
@@ -248,10 +248,10 @@ func TestPreprocess(t *testing.T) {
 			},
 			expectedResponse: &types.ConstructionPreprocessResponse{
 				Options: map[string]interface{}{
-					"from":      preprocessFromAddress,
-					"to":        preprocessToAddress,
-					"value":     preprocessTransferValueHex,
-					"gas_tip":   preprocessGasTipHex,
+					"from":    preprocessFromAddress,
+					"to":      preprocessToAddress,
+					"value":   preprocessTransferValueHex,
+					"gas_tip": preprocessGasTipHex,
 				},
 			},
 		},

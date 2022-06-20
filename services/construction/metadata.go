@@ -107,7 +107,7 @@ func (a *APIService) ConstructionMetadata(
 		}
 	}
 
-	header, err :=  a.client.BlockHeader(ctx, nil)
+	header, err := a.client.BlockHeader(ctx, nil)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
@@ -120,18 +120,25 @@ func (a *APIService) ConstructionMetadata(
 	var gasCap *big.Int
 	if input.GasCap == nil {
 		// Set default max fee to double the last base fee plus priority tip
-		// to ensure tx is highly likely to go out in the next block
+		// to ensure tx is highly likely to go out in the next block.
 		multiplier := big.NewInt(2)
 		gasCap = new(big.Int).Add(gasTip, new(big.Int).Mul(header.BaseFee, multiplier))
 	} else {
 		gasCap = input.GasCap
 	}
 
+	// Ensure the gas cap is at least 30 gwei, the minimum gas price that the node will accept on mainnet.
+	// See https://forum.polygon.technology/t/recommended-min-gas-price-setting/7604 for additional context.
+	minFee := big.NewInt(30000000000) // 30 gwei
+	if minFee.Cmp(gasCap) == 1 {
+		gasCap = minFee
+	}
+
 	metadata := &metadata{
 		Nonce:           nonce,
 		GasLimit:        gasLimit,
 		GasCap:          gasCap,
-		GasTip: 		 gasTip,
+		GasTip:          gasTip,
 		Data:            input.Data,
 		Value:           input.Value,
 		To:              to,
@@ -144,8 +151,9 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrUnableToParseIntermediateResult, err)
 	}
 
-	// Find suggested gas usage
-	suggestedFee := (header.BaseFee.Int64() + metadata.GasTip.Int64()) * int64(gasLimit)
+	// Find suggested gas usage. Note that this figure accounts for the minimum (30 gwei), and
+	// is potentially doubled the block base fee.
+	suggestedFee := gasCap.Int64() * int64(gasLimit)
 
 	return &types.ConstructionMetadataResponse{
 		Metadata: metadataMap,

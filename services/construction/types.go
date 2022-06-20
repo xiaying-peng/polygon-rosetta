@@ -340,7 +340,7 @@ type transaction struct {
 	Value    *big.Int `json:"value"`
 	Data     []byte   `json:"data"`
 	Nonce    uint64   `json:"nonce"`
-	GasCap 	 *big.Int `json:"max_fee_per_gas"`
+	GasCap   *big.Int `json:"max_fee_per_gas"`
 	GasTip   *big.Int `json:"max_priority_fee_per_gas"`
 	GasLimit uint64   `json:"gas"`
 	ChainID  *big.Int `json:"chain_id"`
@@ -352,7 +352,7 @@ type transactionWire struct {
 	Value    string `json:"value"`
 	Data     string `json:"data"`
 	Nonce    string `json:"nonce"`
-	GasCap 	 string `json:"max_fee_per_gas"`
+	GasCap   string `json:"max_fee_per_gas"`
 	GasTip   string `json:"max_priority_fee_per_gas"`
 	GasLimit string `json:"gas"`
 	ChainID  string `json:"chain_id"`

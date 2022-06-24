@@ -32,8 +32,10 @@ import (
 )
 
 var (
-	invalidTransferData = "0xaaaaaaaa000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
-
+	invalidTransferData  = "0xaaaaaaaa000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e70000000000000000000000000000000000000000000000000000000000000001" // nolint
+	fromAddress          = "0x966fbC4E1F3a938Cf7798695C3244d9C7C190015"
+	toAddress            = "0xefD3dc58D60aF3295B92ecd484CAEB3A2f30b3e7"
+	tokenContractAddress = "0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e"
 )
 
 func TestPayloads(t *testing.T) {
@@ -49,7 +51,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateNativeCurrencyUnsigned(),
-				"0x3caf34daaaf7bfd3a8fb58a7a351b354df0945bba7723f70d1bbff5bcf4b83a5",
+				"0x9e938823ecaa9195688dab7791d982c215625650bfcb91ef7d36c606dbfd7577",
 			),
 		},
 		"happy path: ERC20 currency": {
@@ -65,7 +67,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateERC20CurrencyUnsigned(),
-				"0xc3ded208fa7991852eab06cae487e5fa193bffe8358fe3a5b6a3a3cce8c7e74b",
+				"0x0cdff6dd3c864bbf152c52b538f2e75fccc09dc2ae919d0c346ad22c19288e02",
 			),
 		},
 		"happy path: Generic contract call": {
@@ -81,7 +83,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateGenericContractCallUnsigned(),
-				"0xaf70e3931747fca4b94ef94445ffd8e20af420c83eeec7a6fe5156e7733fb242",
+				"0x19edd34647a14135f3ac175b8c4a4f1bb540b554a3d2b47a96bb8a3c131ede95",
 			),
 		},
 		"error: bad request: native currency mismatch destination address": {
@@ -269,5 +271,14 @@ func templateGenericContractCallUnsigned() string {
 		transferGasTipHex,
 		transferGasLimitERC20Hex,
 		chainIDHex,
+	)
+}
+
+func templateOperations(amount uint64, currency *types.Currency) []*types.Operation {
+	return rosettaOperations(
+		fromAddress,
+		toAddress,
+		big.NewInt(int64(amount)),
+		currency,
 	)
 }

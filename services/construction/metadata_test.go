@@ -134,7 +134,7 @@ func TestMetadata(t *testing.T) {
 				},
 			},
 		},
-		"happy path: native currency with gas tip set to 30 gwei floor": {
+		"happy path: native currency with low estimated gas tip overriden to 30 gwei": {
 			options: map[string]interface{}{
 				"from":  metadataFrom,
 				"to":    metadataTo,
@@ -147,12 +147,12 @@ func TestMetadata(t *testing.T) {
 					"value":     transferValueHex,
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitHex,
-					"gas_cap":   minGasCapHex,
+					"gas_cap":   transferGasCapWithTipHex,
 					"gas_tip":   transferGasTipHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
-						Value:    fmt.Sprintf("%d", (minGasCap.Uint64())*transferGasLimit),
+						Value:    fmt.Sprintf("%d", transferGasCapWithTip*transferGasLimit),
 						Currency: polygon.Currency,
 					},
 				},
@@ -161,10 +161,10 @@ func TestMetadata(t *testing.T) {
 				var blockNum *big.Int = nil
 
 				client.On("BlockHeader", ctx, blockNum).
-					Return(&headerWithLowBaseFee, nil)
+					Return(&header, nil)
 
 				client.On("SuggestGasTipCap", ctx).
-					Return(big.NewInt(int64(transferGasTip)), nil)
+					Return(big.NewInt(int64(transferGasTipEstimate)), nil)
 
 			},
 		},

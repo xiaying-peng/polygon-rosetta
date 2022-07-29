@@ -330,37 +330,24 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 
 	// Test with non-1.0 gas tip multiplier
 	tipMultiplier = 1.2
-	mockClient.On(
-		"BlockHeader",
-		ctx,
-		blockNum,
-	).Return(
-		&header,
-		nil,
-	).Once()
-	mockClient.On(
-		"SuggestGasTipCap",
-		ctx,
-	).Return(
-		big.NewInt(int64(transferGasTipEstimate)), // this value is to be overriden by the 30 gwei min
-		nil,
-	).Once()
-	mockClient.On(
-		"PendingNonceAt",
-		ctx,
-		common.HexToAddress(constructionFromAddress),
-	).Return(
-		uint64(0),
-		nil,
-	).Once()
+	mockClient.
+		On("BlockHeader", ctx, blockNum).
+		Return(&header, nil).
+		Once()
+	mockClient.
+		On("SuggestGasTipCap", ctx).
+		Return(big.NewInt(int64(transferGasTipEstimate)), nil).
+		Once()
+	mockClient.
+		On("PendingNonceAt", ctx, common.HexToAddress(constructionFromAddress)).
+		Return(uint64(0), nil).
+		Once()
 
-	gasTip := multiplyBigInt(big.NewInt(int64(transferGasTip)), tipMultiplier)
-	gasCap := new(big.Int).Add(gasTip, big.NewInt(60000000000)) // tip + baseFee*2
-
+	gasTip := multiplyBigInt(big.NewInt(int64(transferGasTip)), tipMultiplier) // 30gwei*1.2 = 36gwei
 	metadata2 := &metadata{
 		GasLimit: 21000,
 		GasTip:   gasTip,
-		GasCap:   gasCap,
+		GasCap:   new(big.Int).Add(gasTip, big.NewInt(60000000000)), // gasTip + baseFee*2 = 96gwei
 		Nonce:    0,
 		To:       constructionToAddress,
 		Value:    big.NewInt(1000),
@@ -375,7 +362,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 		Metadata: forceMarshalMap(t, metadata2),
 		SuggestedFee: []*types.Amount{
 			{
-				Value:    "2016000000000000", // (2*30gwei + 1.2*30gwei) * 21000
+				Value:    "2016000000000000", // gasCap * 21000
 				Currency: polygon.Currency,
 			},
 		},

@@ -69,16 +69,14 @@ var (
 	transferNonceHex         = hexutil.EncodeUint64(transferNonce) // 0x43
 	transferNonceHex2        = "0x22"
 	transferData             = "0xa9059cbb000000000000000000000000efd3dc58d60af3295b92ecd484caeb3a2f30b3e7000000000000000000000000000000000000000000000000000000000134653c" //nolint
-	transferGasCap           = uint64(30000000000)                                                                                                                          // 30 gwei
-	// transferGasCapHex        = hexutil.EncodeUint64(transferGasCap) // 0x6FC23AC00
-	transferGasTip         = uint64(30000000000)                  // 30 gwei, accounts for floor
-	transferGasTipHex      = hexutil.EncodeUint64(transferGasTip) // 0x6FC23AC00
-	transferGasTipEstimate = uint64(3000000000)                   // 3 gwei
-	// transferGasTipEstimateHex = hexutil.EncodeUint64(transferGasTip) // 0xB2D05E00
-	transferGasCapWithTip    = transferGasCap + 2*transferGasTip           // 90 gwei
+
+	transferGasCap           = uint64(30000000000)                         // 30 gwei
+	transferGasTip           = uint64(30000000000)                         // 30 gwei, accounts for floor
+	transferGasTipHex        = hexutil.EncodeUint64(transferGasTip)        // 0x6FC23AC00
+	transferGasTipEstimate   = uint64(3000000000)                          // 3 gwei
+	transferGasCapWithTip    = 2*transferGasCap + transferGasTip           // 90 gwei
 	transferGasCapWithTipHex = hexutil.EncodeUint64(transferGasCapWithTip) // 0x14F46B0400
 	minGasCap                = big.NewInt(30000000000)
-	// minGasCapHex              = hexutil.EncodeUint64(minGasCap.Uint64())
 
 	header = EthTypes.Header{
 		ParentHash:  common.Hash{},
@@ -124,6 +122,7 @@ func forceMarshalMap(t *testing.T, i interface{}) map[string]interface{} {
 }
 
 func TestConstructionFlowWithPendingNonce(t *testing.T) {
+	tipMultiplier = 1.0 // These tests were created before we introduced a tip multiplier
 	cfg := &configuration.Configuration{
 		Mode:    configuration.Online,
 		Network: networkIdentifier,
@@ -174,10 +173,10 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, preprocessResponse)
 
 	// Test Metadata
-	metadata := &metadata{
+	metadata1 := &metadata{
 		GasLimit: 21000,
 		GasTip:   big.NewInt(int64(transferGasTip)),
-		GasCap:   big.NewInt(int64(transferGasCapWithTip)), // math: gasCap = new(big.Int).Add(gasTip, new(big.Int).Mul(baseFee, multiplier))
+		GasCap:   big.NewInt(int64(transferGasCapWithTip)),
 		Nonce:    0,
 		To:       constructionToAddress,
 		Value:    big.NewInt(1000),
@@ -213,7 +212,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, &types.ConstructionMetadataResponse{
-		Metadata: forceMarshalMap(t, metadata),
+		Metadata: forceMarshalMap(t, metadata1),
 		SuggestedFee: []*types.Amount{
 			{
 				Value:    "1890000000000000",
@@ -227,7 +226,7 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	payloadsResponse, err := servicer.ConstructionPayloads(ctx, &types.ConstructionPayloadsRequest{
 		NetworkIdentifier: networkIdentifier,
 		Operations:        ops,
-		Metadata:          forceMarshalMap(t, metadata),
+		Metadata:          forceMarshalMap(t, metadata1),
 	})
 	assert.Nil(t, err)
 
@@ -252,10 +251,10 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	parseMetadata := &parseMetadata{
-		Nonce:    metadata.Nonce,
-		GasCap:   metadata.GasCap,
-		GasTip:   metadata.GasTip,
-		GasLimit: metadata.GasLimit,
+		Nonce:    metadata1.Nonce,
+		GasCap:   metadata1.GasCap,
+		GasTip:   metadata1.GasTip,
+		GasLimit: metadata1.GasLimit,
 		ChainID:  big.NewInt(80001),
 	}
 	assert.Equal(t, &types.ConstructionParseResponse{
@@ -328,9 +327,50 @@ func TestConstructionFlowWithPendingNonce(t *testing.T) {
 	}, submitResponse)
 
 	mockClient.AssertExpectations(t)
+
+	// Test with non-1.0 gas tip multiplier
+	tipMultiplier = 1.2
+	mockClient.
+		On("BlockHeader", ctx, blockNum).
+		Return(&header, nil).
+		Once()
+	mockClient.
+		On("SuggestGasTipCap", ctx).
+		Return(big.NewInt(int64(transferGasTipEstimate)), nil).
+		Once()
+	mockClient.
+		On("PendingNonceAt", ctx, common.HexToAddress(constructionFromAddress)).
+		Return(uint64(0), nil).
+		Once()
+
+	gasTip := multiplyBigInt(big.NewInt(int64(transferGasTip)), tipMultiplier) // 30gwei*1.2 = 36gwei
+	metadata2 := &metadata{
+		GasLimit: 21000,
+		GasTip:   gasTip,
+		GasCap:   new(big.Int).Add(gasTip, big.NewInt(60000000000)), // gasTip + baseFee*2 = 96gwei
+		Nonce:    0,
+		To:       constructionToAddress,
+		Value:    big.NewInt(1000),
+	}
+
+	metadataResponse, err = servicer.ConstructionMetadata(ctx, &types.ConstructionMetadataRequest{
+		NetworkIdentifier: networkIdentifier,
+		Options:           forceMarshalMap(t, &options),
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, &types.ConstructionMetadataResponse{
+		Metadata: forceMarshalMap(t, metadata2),
+		SuggestedFee: []*types.Amount{
+			{
+				Value:    "2016000000000000", // gasCap * 21000
+				Currency: polygon.Currency,
+			},
+		},
+	}, metadataResponse)
 }
 
 func TestConstructionFlowWithInputNonce(t *testing.T) {
+	tipMultiplier = 1.0 // These tests were created before there was a tip multiplier
 	networkIdentifier = &types.NetworkIdentifier{
 		Network:    polygon.TestnetNetwork,
 		Blockchain: polygon.Blockchain,

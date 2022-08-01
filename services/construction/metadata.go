@@ -30,6 +30,24 @@ import (
 	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
 )
 
+var (
+	// Multipliers used for setting tx fees to a value unlikely to be too low for current block
+	// inclusion. TODO: Add command-line params to set these to non-default values.
+	baseFeeMultiplier float64 = 2.0
+	tipMultiplier     float64 = 1.2
+)
+
+// multiplyBigInt multiplies i and multiplier using a big.Float with the result rounded to the
+// nearest big.Int. i is modified to contain the result and returned.
+func multiplyBigInt(i *big.Int, multiplier float64) *big.Int {
+	f := new(big.Float).SetInt(i)
+	m := big.NewFloat(multiplier)
+	f.Mul(f, m)
+	f.Add(f, new(big.Float).SetFloat64(.5)) // force rounding assuming f is non-negative
+	f.Int(i)
+	return i
+}
+
 // ConstructionMetadata implements the /construction/metadata endpoint.
 func (a *APIService) ConstructionMetadata(
 	ctx context.Context,
@@ -130,13 +148,13 @@ func (a *APIService) ConstructionMetadata(
 	if minTip.Cmp(gasTip) == 1 {
 		gasTip = minTip
 	}
+	multiplyBigInt(gasTip, tipMultiplier)
 
 	var gasCap *big.Int
 	if input.GasCap == nil {
-		// Set default max fee to double the last base fee plus multiplied priority tip
-		// to ensure tx is highly likely to go out in the next block.
-		multiplier := big.NewInt(2)
-		gasCap = new(big.Int).Add(gasTip, new(big.Int).Mul(header.BaseFee, multiplier))
+		baseFee := new(big.Int).Set(header.BaseFee)
+		multiplyBigInt(baseFee, baseFeeMultiplier)
+		gasCap = baseFee.Add(baseFee, gasTip)
 	} else {
 		gasCap = input.GasCap
 	}

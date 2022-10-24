@@ -182,7 +182,7 @@ func TestPreprocess(t *testing.T) {
 			expectedResponse: &types.ConstructionPreprocessResponse{
 				Options: map[string]interface{}{
 					"from":             preprocessFromAddress,
-					"to":               preprocessToAddress, // it will be contract address user need to pass in operation
+					"to":               preprocessToAddress,
 					"value":            "0x1",
 					"contract_address": preprocessToAddress,
 					"data":             complexMethodData,

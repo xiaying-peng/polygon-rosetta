@@ -51,7 +51,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateNativeCurrencyUnsigned(),
-				"0x9e938823ecaa9195688dab7791d982c215625650bfcb91ef7d36c606dbfd7577",
+				"0x564f25843f6f5866ae38559131ec05ab146ed5e5c40f8833488be59e1b007739",
 			),
 		},
 		"happy path: ERC20 currency": {
@@ -67,7 +67,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateERC20CurrencyUnsigned(),
-				"0x0cdff6dd3c864bbf152c52b538f2e75fccc09dc2ae919d0c346ad22c19288e02",
+				"0x4384197d346d6bd8fbe1ba7a92c5b1cd5bd5c9e0cb185bc3be7b60973afd730c",
 			),
 		},
 		"happy path: Generic contract call": {
@@ -83,7 +83,7 @@ func TestPayloads(t *testing.T) {
 			),
 			expectedResponse: templateConstructionPayloadsResponse(
 				templateGenericContractCallUnsigned(),
-				"0x19edd34647a14135f3ac175b8c4a4f1bb540b554a3d2b47a96bb8a3c131ede95",
+				"0x63ab9085eff035bf3249683fec103b5ab745c136f7b58f6c80ee9d0abb89973d",
 			),
 		},
 		"error: bad request: native currency mismatch destination address": {
@@ -199,7 +199,7 @@ func templateNativeCurrencyTxMetadata(amount string) map[string]interface{} {
 		"value":     amount,
 		"gas_limit": transferGasLimitHex,
 		"gas_cap":   transferGasCapWithTipHex,
-		"gas_tip":   transferGasTipHex,
+		"gas_tip":   transferGasTipMultipliedHex,
 	}
 }
 
@@ -210,7 +210,7 @@ func templateERC20CurrencyTxMetadata() map[string]interface{} {
 		"value":     "0x0",
 		"gas_limit": transferGasLimitERC20Hex,
 		"gas_cap":   transferGasCapWithTipHex,
-		"gas_tip":   transferGasTipHex,
+		"gas_tip":   transferGasTipMultipliedHex,
 		"data":      metadataData,
 	}
 }
@@ -224,7 +224,7 @@ func templateNativeCurrencyUnsigned() string {
 		"0x",
 		transferNonceHex,
 		transferGasCapWithTipHex,
-		transferGasTipHex,
+		transferGasTipMultipliedHex,
 		transferGasLimitHex,
 		chainIDHex,
 	)
@@ -239,7 +239,7 @@ func templateERC20CurrencyUnsigned() string {
 		metadataData,
 		transferNonceHex,
 		transferGasCapWithTipHex,
-		transferGasTipHex,
+		transferGasTipMultipliedHex,
 		transferGasLimitERC20Hex,
 		chainIDHex,
 	)
@@ -252,7 +252,7 @@ func templateGenericContractCallTxMetadata() map[string]interface{} {
 		"value":            "0x0",
 		"gas_limit":        transferGasLimitERC20Hex,
 		"gas_cap":          transferGasCapWithTipHex,
-		"gas_tip":          transferGasTipHex,
+		"gas_tip":          transferGasTipMultipliedHex,
 		"data":             metadataGenericData,
 		"method_signature": "approve(address,uint256)",
 		"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
@@ -268,7 +268,7 @@ func templateGenericContractCallUnsigned() string {
 		metadataGenericData,
 		transferNonceHex,
 		transferGasCapWithTipHex,
-		transferGasTipHex,
+		transferGasTipMultipliedHex,
 		transferGasLimitERC20Hex,
 		chainIDHex,
 	)

@@ -77,7 +77,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitHex,
 					"gas_cap":   transferGasCapWithTipHex,
-					"gas_tip":   transferGasTipHex,
+					"gas_tip":   transferGasTipMultipliedHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
@@ -124,7 +124,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":     transferNonceHex,
 					"gas_limit": transferGasLimitHex,
 					"gas_cap":   transferGasCapWithTipHex,
-					"gas_tip":   transferGasTipHex,
+					"gas_tip":   transferGasTipMultipliedHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
@@ -134,7 +134,7 @@ func TestMetadata(t *testing.T) {
 				},
 			},
 		},
-		"happy path: native currency with low estimated gas tip overriden to 30 gwei": {
+		"happy path: native currency with low estimated gas tip overridden to 40 gwei": {
 			options: map[string]interface{}{
 				"from":  metadataFrom,
 				"to":    metadataTo,
@@ -148,7 +148,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitHex,
 					"gas_cap":   transferGasCapWithTipHex,
-					"gas_tip":   transferGasTipHex,
+					"gas_tip":   transferGasTipMultipliedHex,
 				},
 				SuggestedFee: []*types.Amount{
 					{
@@ -203,7 +203,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":     transferNonceHex2,
 					"gas_limit": transferGasLimitERC20Hex,
 					"gas_cap":   transferGasCapWithTipHex,
-					"gas_tip":   transferGasTipHex,
+					"gas_tip":   transferGasTipMultipliedHex,
 					"data":      metadataData,
 				},
 				SuggestedFee: []*types.Amount{
@@ -251,7 +251,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
 					"gas_cap":          transferGasCapWithTipHex,
-					"gas_tip":          transferGasTipHex,
+					"gas_tip":          transferGasTipMultipliedHex,
 					"data":             metadataGenericData,
 					"method_signature": "approve(address,uint256)",
 					"method_args":      []interface{}{"0xD10a72Cf054650931365Cc44D912a4FD75257058", "1000"},
@@ -301,7 +301,7 @@ func TestMetadata(t *testing.T) {
 					"nonce":            transferNonceHex2,
 					"gas_limit":        transferGasLimitERC20Hex,
 					"gas_cap":          transferGasCapWithTipHex,
-					"gas_tip":          transferGasTipHex,
+					"gas_tip":          transferGasTipMultipliedHex,
 					"data":             metadataMaticWithdrawData,
 					"method_signature": "withdraw(uint256)",
 					"method_args":      []interface{}{"100000000"},

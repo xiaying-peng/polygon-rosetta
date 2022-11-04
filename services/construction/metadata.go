@@ -34,7 +34,7 @@ var (
 	// Multipliers used for setting tx fees to a value unlikely to be too low for current block
 	// inclusion. TODO: Add command-line params to set these to non-default values.
 	baseFeeMultiplier float64 = 2.0
-	tipMultiplier     float64 = 1.2
+	tipMultiplier     float64 = 2.0
 )
 
 // multiplyBigInt multiplies i and multiplier using a big.Float with the result rounded to the
@@ -141,10 +141,10 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
-	// Ensure the gas tip is at least 30 gwei. This is the minimum gas price recommended by the Polygon team.
+	// Ensure the gas tip is at least 40 gwei. This is the minimum gas price recommended by the Polygon team.
 	// See https://forum.polygon.technology/t/recommended-min-gas-price-setting/7604 for additional context.
 	// This minimum must be applied to the tip, not the cap to effectivley mitigate spam (since the tip goes to miners)
-	minTip := big.NewInt(30000000000) // 30 gwei
+	minTip := big.NewInt(40000000000) // 40 gwei
 	if minTip.Cmp(gasTip) == 1 {
 		gasTip = minTip
 	}

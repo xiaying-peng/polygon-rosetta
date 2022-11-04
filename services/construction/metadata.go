@@ -136,14 +136,26 @@ func (a *APIService) ConstructionMetadata(
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
-	gasTip, err := a.client.SuggestGasTipCap(ctx)
+	// Note on GasTip handling: if GasTip is overridden, use it, as long as it is greater than the suggested gas tip.
+	// If it isn't overridden, simply use the suggested gas tip. In either case, we later apply a multiplier to give
+	// the transaction the best shot to go through.
+	suggestedGasTipCap, err := a.client.SuggestGasTipCap(ctx)
 	if err != nil {
 		return nil, svcErrors.WrapErr(svcErrors.ErrGeth, err)
 	}
 
-	// Ensure the gas tip is at least 40 gwei. This is the minimum gas price recommended by the Polygon team.
+	var gasTip *big.Int
+	if input.GasTip == nil || input.GasTip.Cmp(suggestedGasTipCap) == -1 {
+		// If input is nil, or if input is less than the suggested gas tip, use the suggested.
+		gasTip = suggestedGasTipCap
+	} else {
+		gasTip = input.GasTip
+	}
+
+	// 30 gwei is the minimum gas price recommended by the Polygon team. Let's include a buffer and
+	// ensure the gas tip is at least 40 gwei. 
 	// See https://forum.polygon.technology/t/recommended-min-gas-price-setting/7604 for additional context.
-	// This minimum must be applied to the tip, not the cap to effectivley mitigate spam (since the tip goes to miners)
+	// This minimum must be applied to the tip, not the cap to effectively mitigate spam (since the tip goes to miners)
 	minTip := big.NewInt(40000000000) // 40 gwei
 	if minTip.Cmp(gasTip) == 1 {
 		gasTip = minTip

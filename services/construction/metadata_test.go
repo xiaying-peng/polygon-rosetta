@@ -134,7 +134,7 @@ func TestMetadata(t *testing.T) {
 				},
 			},
 		},
-		"happy path: native currency with low estimated gas tip overridden to 30 gwei": {
+		"happy path: native currency with low estimated gas tip overridden to 40 gwei": {
 			options: map[string]interface{}{
 				"from":  metadataFrom,
 				"to":    metadataTo,

@@ -107,6 +107,22 @@ func TestPreprocess(t *testing.T) {
 				},
 			},
 		},
+		"happy path: native currency with nonce and gas_tip": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"nonce": "1",
+				"gas_tip": "40000000000",
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":  preprocessFromAddress,
+					"to":    preprocessToAddress,
+					"value": preprocessTransferValueHex,
+					"nonce": "0x1",
+					"gas_tip": transferGasTipHex, // hex of 40000000000
+				},
+			},
+		},
 		"happy path: ERC20 currency with nonce": {
 			operations: templateOperations(preprocessTransferValue, &types.Currency{
 				Symbol:   "USDC",
@@ -126,6 +142,30 @@ func TestPreprocess(t *testing.T) {
 					"token_address": preprocessTokenContractAddress,
 					"data":          preprocessData,
 					"nonce":         "0x22",
+				},
+			},
+		},
+		"happy path: ERC20 currency with nonce and gas_tip": {
+			operations: templateOperations(preprocessTransferValue, &types.Currency{
+				Symbol:   "USDC",
+				Decimals: 18,
+				Metadata: map[string]interface{}{
+					"token_address": preprocessTokenContractAddress,
+				},
+			}),
+			metadata: map[string]interface{}{
+				"nonce": "34",
+				"gas_tip": "40000000000",
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":          preprocessFromAddress,
+					"to":            preprocessToAddress,
+					"value":         "0x0",
+					"token_address": preprocessTokenContractAddress,
+					"data":          preprocessData,
+					"nonce":         "0x22",
+					"gas_tip": transferGasTipHex, // hex of 40000000000
 				},
 			},
 		},

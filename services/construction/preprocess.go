@@ -511,6 +511,6 @@ func encodeMethodArgsStrings(sigData []byte, methodSig string, methodArgs []stri
 		}
 		argumentsData = append(argumentsData, argData)
 	}
-	encData, _ := arguments.PackValues(argumentsData)
-	return append(sigData, encData...), nil
+	encData, packErr := arguments.PackValues(argumentsData)
+	return append(sigData, encData...), packErr
 }

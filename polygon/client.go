@@ -249,6 +249,7 @@ func (ec *Client) peers(ctx context.Context) ([]*RosettaTypes.Peer, error) {
 // contract address after the transaction has been mined.
 func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) error {
 	data, err := rlp.EncodeToBytes(tx)
+	
 	if err != nil {
 		return err
 	}

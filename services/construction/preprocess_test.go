@@ -48,6 +48,10 @@ var (
 	complexMethodSignature            = "mintItemBatch(address[],string)"
 	complexMethodArgs                 = "000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000b406c0106ba32281ddfa75626479304feb70d0580000000000000000000000003cdc2ce790d740fd8b8e99baf738497c5e2de62000000000000000000000000006da92f4f1815e83cf5a020f952f0e3275a5b156000000000000000000000000f344767634735d588357ed5828488094bef02efe000000000000000000000000000000000000000000000000000000000000002e516d614b57483933397346454464576333347252395453433868647758624357574575454a6b6476714e334a7573000000000000000000000000000000000000"
 	complexMethodData                 = "0x079c66c0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000b406c0106ba32281ddfa75626479304feb70d0580000000000000000000000003cdc2ce790d740fd8b8e99baf738497c5e2de62000000000000000000000000006da92f4f1815e83cf5a020f952f0e3275a5b156000000000000000000000000f344767634735d588357ed5828488094bef02efe000000000000000000000000000000000000000000000000000000000000002e516d614b57483933397346454464576333347252395453433868647758624357574575454a6b6476714e334a7573000000000000000000000000000000000000"
+	bytesMethodSignature              = "deploy(bytes32,address,address)"
+	bytesMethodArgs                   = []string{"0x0000000000000000000000000000000000000000000000000000000000000000", "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000", "0xb0935a466e6Fa8FDa8143C7f4a8c149CA56D06FE"}
+	expectedBytesMethodArgs           = []interface{}{"0x0000000000000000000000000000000000000000000000000000000000000000", "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000", "0xb0935a466e6Fa8FDa8143C7f4a8c149CA56D06FE"}
+	expectedBytesMethodData           = "0xcf9d137c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000deaddeaddeaddeaddeaddeaddeaddeaddead0000000000000000000000000000b0935a466e6fa8fda8143c7f4a8c149ca56d06fe"
 )
 
 func TestPreprocess(t *testing.T) {
@@ -229,6 +233,26 @@ func TestPreprocess(t *testing.T) {
 					"nonce":            "0x22",
 					"method_signature": complexMethodSignature,
 					"method_args":      complexMethodArgs,
+				},
+			},
+		},
+		"happy path: generic contract call with byte arguments": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"nonce":            "34",
+				"method_signature": bytesMethodSignature,
+				"method_args":      bytesMethodArgs,
+			},
+			expectedResponse: &types.ConstructionPreprocessResponse{
+				Options: map[string]interface{}{
+					"from":             preprocessFromAddress,
+					"to":               preprocessToAddress,
+					"value":            "0x1",
+					"contract_address": preprocessToAddress,
+					"data":             expectedBytesMethodData,
+					"nonce":            "0x22",
+					"method_signature": bytesMethodSignature,
+					"method_args":      expectedBytesMethodArgs,
 				},
 			},
 		},
@@ -497,6 +521,28 @@ func TestPreprocess(t *testing.T) {
 			expectedResponse: nil,
 			expectedError: templateError(
 				svcErrors.ErrInvalidTokenContractAddress, "token contract address is not a valid address"),
+		},
+		"error: invalid bytes size": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"nonce":            "34",
+				"method_signature": "deploy(bytes33,address,address)",
+				"method_args":      bytesMethodArgs,
+			},
+			expectedResponse: nil,
+			expectedError: templateError(
+				svcErrors.ErrFetchFunctionSignatureMethodID, "received invalid type bytes33; size 33 must be between 1 and 32"),
+		},
+		"error: invalid bytes format": {
+			operations: templateOperations(preprocessTransferValue, polygon.Currency),
+			metadata: map[string]interface{}{
+				"nonce":            "34",
+				"method_signature": bytesMethodSignature,
+				"method_args":      []string{"not-bytes", "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000", "0xb0935a466e6Fa8FDa8143C7f4a8c149CA56D06FE"},
+			},
+			expectedResponse: nil,
+			expectedError: templateError(
+				svcErrors.ErrFetchFunctionSignatureMethodID, "hex string without 0x prefix"),
 		},
 	}
 

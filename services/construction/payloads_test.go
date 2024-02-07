@@ -20,15 +20,15 @@ import (
 	"math/big"
 	"testing"
 
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
+	svcErrors "github.com/xiaying-peng/polygon-rosetta/services/errors"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/maticnetwork/polygon-rosetta/configuration"
+	"github.com/xiaying-peng/polygon-rosetta/configuration"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/maticnetwork/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
 )
 
 var (

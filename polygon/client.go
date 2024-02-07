@@ -39,10 +39,10 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
-	BorTypes "github.com/maticnetwork/polygon-rosetta/polygon/types"
+	BorTypes "github.com/xiaying-peng/polygon-rosetta/polygon/types"
 	"golang.org/x/sync/semaphore"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon/utilities/artifacts"
+	"github.com/xiaying-peng/polygon-rosetta/polygon/utilities/artifacts"
 )
 
 const (

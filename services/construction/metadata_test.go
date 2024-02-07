@@ -25,10 +25,10 @@ import (
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/maticnetwork/polygon-rosetta/configuration"
-	mocks "github.com/maticnetwork/polygon-rosetta/mocks/services"
-	"github.com/maticnetwork/polygon-rosetta/polygon"
-	"github.com/maticnetwork/polygon-rosetta/services/errors"
+	"github.com/xiaying-peng/polygon-rosetta/configuration"
+	mocks "github.com/xiaying-peng/polygon-rosetta/mocks/services"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/services/errors"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -19,9 +19,9 @@ import (
 	"math/big"
 	"testing"
 
-	svcError "github.com/maticnetwork/polygon-rosetta/services/errors"
+	svcError "github.com/xiaying-peng/polygon-rosetta/services/errors"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"

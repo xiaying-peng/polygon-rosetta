@@ -27,7 +27,7 @@ import (
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/maticnetwork/polygon-rosetta/polygon/utilities/artifacts"
+	"github.com/xiaying-peng/polygon-rosetta/polygon/utilities/artifacts"
 )
 
 const (

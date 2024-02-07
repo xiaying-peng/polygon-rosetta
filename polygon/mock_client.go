@@ -26,7 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
-	mocks "github.com/maticnetwork/polygon-rosetta/mocks/polygon"
+	mocks "github.com/xiaying-peng/polygon-rosetta/mocks/polygon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/sync/semaphore"

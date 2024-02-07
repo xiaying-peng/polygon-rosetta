@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/maticnetwork/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/params"

@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
+	svcErrors "github.com/xiaying-peng/polygon-rosetta/services/errors"
 	"github.com/stretchr/testify/assert"
 )
 

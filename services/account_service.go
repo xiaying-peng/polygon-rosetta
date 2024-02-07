@@ -17,10 +17,10 @@ package services
 import (
 	"context"
 
-	"github.com/maticnetwork/polygon-rosetta/services/construction"
-	"github.com/maticnetwork/polygon-rosetta/services/errors"
+	"github.com/xiaying-peng/polygon-rosetta/services/construction"
+	"github.com/xiaying-peng/polygon-rosetta/services/errors"
 
-	"github.com/maticnetwork/polygon-rosetta/configuration"
+	"github.com/xiaying-peng/polygon-rosetta/configuration"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 )

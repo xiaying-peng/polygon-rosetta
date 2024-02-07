@@ -17,9 +17,9 @@ package services
 import (
 	"net/http"
 
-	"github.com/maticnetwork/polygon-rosetta/services/construction"
+	"github.com/xiaying-peng/polygon-rosetta/services/construction"
 
-	"github.com/maticnetwork/polygon-rosetta/configuration"
+	"github.com/xiaying-peng/polygon-rosetta/configuration"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/server"

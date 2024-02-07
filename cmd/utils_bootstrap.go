@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/maticnetwork/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
 
 	"github.com/spf13/cobra"
 )

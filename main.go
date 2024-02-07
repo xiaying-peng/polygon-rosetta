@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"github.com/maticnetwork/polygon-rosetta/cmd"
+	"github.com/xiaying-peng/polygon-rosetta/cmd"
 
 	"github.com/fatih/color"
 )

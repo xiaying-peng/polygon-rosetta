@@ -15,7 +15,7 @@
 package construction
 
 import (
-	"github.com/maticnetwork/polygon-rosetta/configuration"
+	"github.com/xiaying-peng/polygon-rosetta/configuration"
 )
 
 const (

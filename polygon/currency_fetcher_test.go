@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	mocks "github.com/maticnetwork/polygon-rosetta/mocks/polygon"
+	mocks "github.com/xiaying-peng/polygon-rosetta/mocks/polygon"
 	"github.com/stretchr/testify/assert"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"

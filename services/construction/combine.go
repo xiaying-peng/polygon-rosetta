@@ -22,7 +22,7 @@ import (
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
-	svcErrors "github.com/maticnetwork/polygon-rosetta/services/errors"
+	svcErrors "github.com/xiaying-peng/polygon-rosetta/services/errors"
 )
 
 // ConstructionCombine implements the /construction/combine

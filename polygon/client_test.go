@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"testing"
 
-	mocks "github.com/maticnetwork/polygon-rosetta/mocks/polygon"
+	mocks "github.com/xiaying-peng/polygon-rosetta/mocks/polygon"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum"

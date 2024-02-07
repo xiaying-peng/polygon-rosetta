@@ -23,7 +23,7 @@ import (
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/maticnetwork/polygon-rosetta/polygon"
+	"github.com/xiaying-peng/polygon-rosetta/polygon"
 
 	"golang.org/x/crypto/sha3"
 )
